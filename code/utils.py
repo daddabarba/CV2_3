@@ -47,4 +47,7 @@ def get_face_basis(dt : h5py._hl.files.File):
             loc = "expression/model",
             n = 20,
         ),
+        np.asarray(
+            dt["shape/representer/cells"]
+        ).T
     )

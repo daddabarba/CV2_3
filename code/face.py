@@ -10,7 +10,9 @@ class FaceComponent:
 
 class FaceBasis:
 
-    def __init__(self, id_comp : FaceComponent, exp_comp : FaceComponent):
+    def __init__(self, id_comp : FaceComponent, exp_comp : FaceComponent, mesh : np.ndarray):
 
         self.id_comp = id_comp
         self.exp_comp = exp_comp
+
+        self.mesh = mesh
