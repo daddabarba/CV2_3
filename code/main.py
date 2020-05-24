@@ -49,7 +49,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--rand_face_file",
         type = str,
-        default = "rand_face.mesh",
+        default = "../meshes/rand_face.mesh",
         help = "File in which to save 3D model of face",
     )
 

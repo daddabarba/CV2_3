@@ -1,8 +1,5 @@
 # Dataset
 *.h5
 
-# Models
-**.mesh
-
 # Caches
 **__pycache__**
