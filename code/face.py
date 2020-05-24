@@ -24,3 +24,20 @@ class FaceBasis:
     def __call__(self, alpha, delta):
 
         return self.id_comp(alpha) + self.exp_comp(delta)
+
+class FaceTransform:
+
+    def __init__(self, basis : FaceBasis):
+
+        self.basis = basis
+
+    def __get_T(self, omega, t):
+
+        z,y,x = omega
+
+        return np.array([
+            [1, 0, 0],
+            [0, np.cos(x), -np.sin(x)],
+            [0, np.sin(x), np.cos(x)]
+        ])
+
