@@ -6,6 +6,7 @@ from camera import *
 
 import h5py
 from matplotlib import pyplot as plt
+import numpy as np
 
 from argparse import ArgumentParser
 
@@ -126,7 +127,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--omega",
-        type = float,
+        type = lambda x : float(x)/180 * np.pi,
         nargs = 3,
         default = [0.0, 0.0, 0.0],
         help = "Euler angle in Z-Y-X format for face rotation"
