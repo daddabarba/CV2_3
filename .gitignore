@@ -1,2 +1,5 @@
 # Dataset
 *.h5
+
+# cache
+**__pycache__**
