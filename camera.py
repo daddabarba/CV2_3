@@ -13,3 +13,41 @@ def get_P(bottom_left : tuple, top_right : tuple, n : float, f : float):
             [0,         0,         -1,           0           ],
         ]
     )
+
+def get_V(bottom_left : tuple, top_right : tuple):
+
+    l, b = bottom_left
+    r, t = top_right
+
+    return np.array(
+        [
+            [(r-l)/2, 0,       0,   (r+l)/2],
+            [0,       (t-b)/2, 0,   (t+b)/2],
+            [0,       0,       1/2, 1/2    ],
+            [0,       0,       0,   1      ]
+        ]
+    )
+
+class Camera:
+
+    def __init__(self, bottom_left, top_right, n, f):
+
+        self.P = get_P(bottom_left, top_right, n, f)
+        self.V = get_V(bottom_left, top_right)
+
+    def __call__(self, x):
+
+        # Apply projection
+        x = self.P @ x
+
+        # Apply viewpoint
+        x = self.V @ x
+
+        # Make homogeneous
+        x /= x[3]
+
+        # Normalize depth
+        x /= x[2]
+
+        return x
+
