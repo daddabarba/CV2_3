@@ -18,7 +18,7 @@ def main(args):
     face_basis = get_face_basis(dt, args.size_id, args.size_exp)
 
     # SECTION 2
-    print("Section 2...\n")
+    print("\nSection 2...")
 
     # Sample alpha and delta
     print("\tSampling latent variables")
@@ -39,12 +39,30 @@ def main(args):
     )
     print("\tSaved to ", args.face_3D_file)
 
+    if args.up_to is not None and args.up_to == "3D":
+        return
+
     # SECTION 3
-    print("Section 3...\n")
+    print("\nSection 3...")
+    print("Rotating face")
 
     # Transform face
     print("\tTransforming face with omega: ", args.omega, " and t: ", args.t)
     face_wt = FaceTransform(face_3D, args.omega, args.t)
+
+    print("\tSaving rotated face data")
+    save_obj(
+        args.face_wt_file,
+        face_wt,
+        face_basis.color,
+        face_basis.mesh
+    )
+    print("\tSaved to ", args.face_wt_file)
+
+    if args.up_to is not None and args.up_to == "rotate":
+        return
+
+    print("Applying camera projection")
 
     # Init camera
     print("\tInitializing camera with bottom-left: ", args.fov[0:2], " top-right: ", args.fov[2:4], " near-far: ", args.fov[4:6])
@@ -59,11 +77,21 @@ def main(args):
     plt.savefig(args.face_uv_file, dpi=900)
     print("\tSaved to ", args.face_uv_file)
 
+    if args.up_to is not None and args.up_to == "project":
+        return
+
 if __name__ == "__main__":
 
     parser = ArgumentParser()
 
     # Basic parameters
+
+    parser.add_argument(
+        "--up_to",
+        type = str,
+        default = None,
+        help = "If given determines where to stop in the pipeline: 3D, rotate, project"
+    )
     parser.add_argument(
         "--prior",
         type = str,
@@ -118,6 +146,13 @@ if __name__ == "__main__":
         nargs = 6,
         default = [0, 0, 1, 1, 0, 1],
         help = "Far and near clip for projection transformation, in order: l,b,r,t,n,f"
+    )
+
+    parser.add_argument(
+        "--face_wt_file",
+        type = str,
+        default = "../meshes/face_wt.obj",
+        help = "File in which to save rotated and translated 3D render of face",
     )
 
     parser.add_argument(
