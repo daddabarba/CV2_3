@@ -35,9 +35,32 @@ class FaceTransform:
 
         z,y,x = omega
 
-        return np.array([
-            [1, 0, 0],
+        R = np.array([
+            [1, 0,         0         ],
             [0, np.cos(x), -np.sin(x)],
-            [0, np.sin(x), np.cos(x)]
+            [0, np.sin(x), np.cos(x) ]
+        ]) @ np.array([
+            [np.cos(y),  0 , np.sin(y)]
+            [0,          1,  0        ],
+            [-np.sin(y), 0,  np.cos(y)]
+        ]) @ np.array([
+            [np.cos(z), -np.sin(z), 0],
+            [np.sin(z), np.cos(z),  0],
+            [0,         0,          1]
         ])
+
+        return np.r_[
+            np.c_[
+                R, t
+            ],
+            np.array([0,0,0,1])
+        ]
+
+    def __to_homogeneous(x):
+        return np.c_[x, np.ones(x.shape[0], 1)]
+
+    def __call__(self, omega, t, alpha, delta):
+
+        # Apply transformation matrix
+        return self.__get_T(omega, t) @ self.__to_homogeneous(self.basis(alpha, delta))
 
