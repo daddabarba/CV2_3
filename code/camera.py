@@ -1,4 +1,5 @@
 import numpy as np
+from utils import *
 
 def get_P(bottom_left : tuple, top_right : tuple, near_far : tuple):
 
@@ -34,6 +35,9 @@ class Camera:
         self.V = get_V(bottom_left, top_right)
 
     def __call__(self, x):
+
+        # Go to homogenous
+        x = to_homogeneous(x)
 
         # Apply projection
         x =  x @ self.P.T
