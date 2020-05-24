@@ -12,15 +12,15 @@ def main(args):
     dt = h5py.File(args.prior, 'r')
 
     # Extract data
-    face_basis = get_face_basis(dt)
+    face_basis = get_face_basis(dt, args.size_id, args.size_exp)
 
     # SECTION 2
     print("Section 2...\n")
 
     # Sample alpha and delta
     print("Sampling latent variables")
-    alpha = np.random.rand(30)*2 - 1
-    delta = np.random.rand(20)*2 - 1
+    alpha = np.random.uniform(-1, 1, args.size_id)
+    delta = np.random.uniform(-1, 1, args.size_exp)
 
     # Generate face from respective alpha and delta
     print("Generating face 3D point-cloud")
@@ -31,8 +31,8 @@ def main(args):
     save_obj(
         args.rand_face_file,
         random_face,
-        np.ones_like(random_face),
-        face_basis.mesh
+        face_basis.color,
+        face_basis.mesh,
     )
 
 if __name__ == "__main__":
@@ -51,6 +51,20 @@ if __name__ == "__main__":
         type = str,
         default = "../meshes/rand_face.obj",
         help = "File in which to save 3D model of face",
+    )
+
+    parser.add_argument(
+        "--size_id",
+        type = int,
+        default = 30,
+        help = "Number of components for id basis"
+    )
+
+    parser.add_argument(
+        "--size_exp",
+        type = int,
+        default = 20,
+        help = "Number of components for exp basis"
     )
 
     main(parser.parse_args())

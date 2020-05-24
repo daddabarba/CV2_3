@@ -25,7 +25,7 @@ def get_latent_descriptors(dt : h5py._hl.files.File, loc : str, n : int):
 
     return FaceComponent(mean, var, E, n)
 
-def get_face_basis(dt : h5py._hl.files.File):
+def get_face_basis(dt : h5py._hl.files.File, size_id, size_exp):
     """
     Gets full face basis, assuming two components (id and expression)
 
@@ -40,14 +40,19 @@ def get_face_basis(dt : h5py._hl.files.File):
         get_latent_descriptors(
             dt = dt,
             loc = "shape/model",
-            n = 30,
+            n = size_id,
         ),
         get_latent_descriptors(
             dt = dt,
             loc = "expression/model",
-            n = 20,
+            n = size_exp,
         ),
         np.asarray(
-            dt["shape/representer/cells"]
-        ).T
+            dt["shape/representer/cells"],
+            dtype = np.float32
+        ).T,
+        np.asarray(
+            dt["color/model/mean"],
+            dtype = np.float32
+        ).reshape(-1, 3)
     )
