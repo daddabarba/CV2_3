@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
 
-from utils import to_homogeneous
+from utils import *
 
 # Face basis classes
 
