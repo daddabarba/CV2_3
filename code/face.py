@@ -25,7 +25,7 @@ class FaceBasis:
 
         return self.id_comp(alpha) + self.exp_comp(delta)
 
-def __get_T(self, omega, t):
+def __get_T(omega, t):
 
     z,y,x = omega
 
@@ -34,7 +34,7 @@ def __get_T(self, omega, t):
         [0, np.cos(x), -np.sin(x)],
         [0, np.sin(x), np.cos(x) ]
     ]) @ np.array([
-        [np.cos(y),  0 , np.sin(y)]
+        [np.cos(y),  0 , np.sin(y)],
         [0,          1,  0        ],
         [-np.sin(y), 0,  np.cos(y)]
     ]) @ np.array([
@@ -45,20 +45,20 @@ def __get_T(self, omega, t):
 
     return np.r_[
         np.c_[
-            R, t
+            R, np.array(t)[:, None]
         ],
-        np.array([0,0,0,1])
+        np.array([[0,0,0,1]])
     ]
 
 def __to_homogeneous(x):
 
-    if x.shape[1] |= 3:
+    if x.shape[1] != 3:
         x = x.T
 
-    return np.c_[x, np.ones(x.shape[0], 1)]
+    return np.c_[x, np.ones((x.shape[0], 1))]
 
 def FaceTransform(x, omega, t):
 
     # Apply transformation matrix
-    return self.__to_homogeneous(x) @ self.__get_T(omega, t).T
+    return __to_homogeneous(x) @ __get_T(omega, t).T
 

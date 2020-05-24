@@ -1,9 +1,10 @@
 import numpy as np
 
-def get_P(bottom_left : tuple, top_right : tuple, n : float, f : float):
+def get_P(bottom_left : tuple, top_right : tuple, near_far : tuple):
 
     l, b = bottom_left
     r, t = top_right
+    n, f = near_far
 
     return np.array([
         [2*n/(r-l), 0,         (r+l)/(r-l),  0           ],
@@ -27,9 +28,9 @@ def get_V(bottom_left : tuple, top_right : tuple):
 
 class Camera:
 
-    def __init__(self, bottom_left, top_right, n, f):
+    def __init__(self, bottom_left, top_right, near_far):
 
-        self.P = get_P(bottom_left, top_right, n, f)
+        self.P = get_P(bottom_left, top_right, near_far)
         self.V = get_V(bottom_left, top_right)
 
     def __call__(self, x):
@@ -41,10 +42,10 @@ class Camera:
         x =  x @ self.V.T
 
         # Normalize depth
-        x /= x[:, 2:]
+        x /= x[:, 2:3]
 
         # Make homogeneous
-        x /= x[:, 3:]
+        x /= x[:, 3:4]
 
         return x[:, :2]
 

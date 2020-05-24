@@ -5,6 +5,7 @@ from face import *
 from camera import *
 
 import h5py
+from matplotlib import pyplot as plt
 
 from argparse import ArgumentParser
 
@@ -36,7 +37,7 @@ def main(args):
         face_basis.color,
         face_basis.mesh,
     )
-    print("\tSaved to ", args.rand_face_file)
+    print("\tSaved to ", args.face_3D_file)
 
     # SECTION 3
     print("Section 3...\n")
@@ -51,11 +52,12 @@ def main(args):
 
     # Generate image from face
     print("\tGenerating uv image")
-    face_uv = Camera(face_wt)
+    face_uv = camera(face_wt)
 
     # Generate image
     plt.scatter(face_uv[:,0], face_uv[:, 1])
     plt.savefig(args.face_uv_file, dpi=900)
+    print("\tSaved to ", args.face_uv_file)
 
 if __name__ == "__main__":
 
