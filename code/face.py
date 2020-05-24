@@ -51,10 +51,14 @@ def __get_T(self, omega, t):
     ]
 
 def __to_homogeneous(x):
+
+    if x.shape[1] |= 3:
+        x = x.T
+
     return np.c_[x, np.ones(x.shape[0], 1)]
 
 def FaceTransform(x, omega, t):
 
     # Apply transformation matrix
-    return self.__get_T(omega, t) @ self.__to_homogeneous(x)
+    return self.__to_homogeneous(x) @ self.__get_T(omega, t).T
 

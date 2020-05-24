@@ -1,6 +1,8 @@
 from supplemental_code import *
+
 from utils import *
 from face import *
+from camera import *
 
 import h5py
 
@@ -18,39 +20,53 @@ def main(args):
     print("Section 2...\n")
 
     # Sample alpha and delta
-    print("Sampling latent variables")
+    print("\tSampling latent variables")
     alpha = np.random.uniform(-1, 1, args.size_id)
     delta = np.random.uniform(-1, 1, args.size_exp)
 
     # Generate face from respective alpha and delta
-    print("Generating face 3D point-cloud")
-    random_face = face_basis(alpha, delta)
+    print("\tGenerating face 3D point-cloud")
+    face_3D = face_basis(alpha, delta)
 
     # Save object for later visualization
-    print("Saving face data")
+    print("\tSaving face data")
     save_obj(
-        args.rand_face_file,
-        random_face,
+        args.face_3D_file,
+        face_3D,
         face_basis.color,
         face_basis.mesh,
     )
+    print("\tSaved to ", args.rand_face_file)
+
+    # SECTION 3
+    print("Section 3...\n")
+
+    # Transform face
+    print("\tTransforming face with omega: ", args.omega, " and t: ", args.t)
+    face_wt = FaceTransform(face_3D, args.omega, args.t)
+
+    # Init camera
+    print("\tInitializing camera with bottom-left: ", args.fov[0:2], " top-right: ", args.fov[2:4], " near-far: ", args.fov[4:6])
+    camera = Camera(args.fov[0:2], args.fov[2:4], args.fov[4:6])
+
+    # Generate image from face
+    print("\tGenerating uv image")
+    face_uv = Camera(face_wt)
+
+    # Generate image
+    plt.scatter(face_uv[:,0], face_uv[:, 1])
+    plt.savefig(args.face_uv_file, dpi=900)
 
 if __name__ == "__main__":
 
     parser = ArgumentParser()
 
+    # Basic parameters
     parser.add_argument(
         "--prior",
         type = str,
         default = "../data/model2017-1_face12_nomouth.h5",
         help = "Location of h5 dictionary containing face prior knowledge"
-    )
-
-    parser.add_argument(
-        "--rand_face_file",
-        type = str,
-        default = "../meshes/rand_face.obj",
-        help = "File in which to save 3D model of face",
     )
 
     parser.add_argument(
@@ -65,6 +81,48 @@ if __name__ == "__main__":
         type = int,
         default = 20,
         help = "Number of components for exp basis"
+    )
+
+    # Parameters Section 2
+
+    parser.add_argument(
+        "--face_3D_file",
+        type = str,
+        default = "../meshes/face_3D.obj",
+        help = "File in which to save 3D model of face",
+    )
+
+    # Parameters Section 3
+
+    parser.add_argument(
+        "--omega",
+        type = float,
+        nargs = 3,
+        default = [0.0, 0.0, 0.0],
+        help = "Euler angle in Z-Y-X format for face rotation"
+    )
+
+    parser.add_argument(
+        "--t",
+        type = float,
+        nargs = 3,
+        default = [0.0, 0.0, 0.0],
+        help = "Translation for face transformation"
+    )
+
+    parser.add_argument(
+        "-fov",
+        type = float,
+        nargs = 6,
+        default = [0, 0, 1, 1, 0, 1],
+        help = "Far and near clip for projection transformation, in order: l,b,r,t,n,f"
+    )
+
+    parser.add_argument(
+        "--face_uv_file",
+        type = str,
+        default = "../meshes/face_uv.png",
+        help = "File in which to save uv render of face",
     )
 
     main(parser.parse_args())

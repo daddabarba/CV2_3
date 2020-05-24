@@ -35,16 +35,16 @@ class Camera:
     def __call__(self, x):
 
         # Apply projection
-        x = self.P @ x
+        x =  x @ self.P.T
 
         # Apply viewpoint
-        x = self.V @ x
-
-        # Make homogeneous
-        x /= x[3]
+        x =  x @ self.V.T
 
         # Normalize depth
-        x /= x[2]
+        x /= x[:, 2:]
 
-        return x
+        # Make homogeneous
+        x /= x[:, 3:]
+
+        return x[:, :2]
 
