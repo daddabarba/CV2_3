@@ -1,4 +1,4 @@
-from torch import nn, Tensor, cat, sin, cos
+from torch import nn, Tensor, tensor, stack, cat, sin, cos
 
 import numpy as np
 import h5py
@@ -105,18 +105,36 @@ class FaceTransform(nn.Module):
 
         z,y,x = omega
 
-        R = Tensor([
-            [1, 0,      0      ],
-            [0, cos(x), -sin(x)],
-            [0, sin(x), cos(x) ]
-        ]) @ Tensor([
-            [cos(y),  0,  sin(y)],
-            [0,       1,  0     ],
-            [-sin(y), 0,  cos(y)]
-        ]) @ Tensor([
-            [cos(z), -sin(z), 0],
-            [sin(z), cos(z),  0],
-            [0,      0,       1]
+        R = stack([
+            stack([
+                tensor(1.0), tensor(0.0), tensor(0.0)
+            ]),
+            stack([
+                tensor(0.0), cos(x),    -sin(x)
+            ]),
+            stack([
+                tensor(0.0), sin(x),    cos(x)
+            ])
+        ]) @ stack([
+            stack([
+                cos(y),    tensor(0.0),  sin(y)
+            ]),
+            stack([
+                tensor(0.0), tensor(1.0),  tensor(0.0)
+            ]),
+            stack([
+                -sin(y),   tensor(0.0),  cos(y)
+            ])
+        ]) @ stack([
+            stack([
+                cos(z),   -sin(z),    tensor(0.0)
+            ]),
+            stack([
+                sin(z),    cos(z),    tensor(0.0)
+            ]),
+            stack([
+                tensor(0.0), tensor(0.0), tensor(1.0)
+            ])
         ])
 
 
