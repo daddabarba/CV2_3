@@ -73,8 +73,16 @@ def main(args):
     print("\tGenerating uv image")
     face_uv = camera(face_wt)
 
+    # Extracting landmark points
+    print("\tExtracting landmark pointsi from", args.landmarks)
+
+    with open(args.landmarks, "rt") as f:
+        lmks = np.array([int(line) for line in f.readlines()])
+
+    face_lmks = face_uv[lmks, :]
+
     # Generate image
-    plt.scatter(face_uv[:,0], face_uv[:, 1])
+    plt.scatter(face_lmks[:,0], face_lmks[:, 1])
     plt.savefig(args.face_uv_file, dpi=900)
     print("\tSaved to ", args.face_uv_file)
 
@@ -145,8 +153,15 @@ if __name__ == "__main__":
         "-fov",
         type = float,
         nargs = 6,
-        default = [0, 0, 1, 1, 0, 1],
+        default = [0, 0, 10, 10, -10, 10],
         help = "Far and near clip for projection transformation, in order: l,b,r,t,n,f"
+    )
+
+    parser.add_argument(
+        "--landmarks",
+        type = str,
+        default = "../data/Landmarks68_model2017-1_face12_nomouth.anl",
+        help = "File from which to get landmarks points"
     )
 
     parser.add_argument(
