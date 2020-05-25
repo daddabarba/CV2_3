@@ -79,7 +79,7 @@ def main(args):
     with open(args.landmarks, "rt") as f:
         lmks = np.array([int(line) for line in f.readlines()])
 
-    face_lmks = face_uv[lmks, :]
+    face_lmks = face_uv[lmks, :2]
 
     # Generate image
     plt.scatter(face_lmks[:,0], face_lmks[:, 1])

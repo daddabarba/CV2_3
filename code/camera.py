@@ -45,11 +45,8 @@ class Camera:
         # Apply viewpoint
         x =  x @ self.V.T
 
-        # Normalize depth
-        x /= x[:, 2:3]
-
         # Make homogeneous
         x /= x[:, 3:4]
 
-        return x[:, :2]
+        return x[:, :3]
 
