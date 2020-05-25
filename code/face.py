@@ -1,4 +1,4 @@
-from torch import nn, Tensor
+from torch import nn, Tensor, cat, sin, cos
 
 import numpy as np
 import h5py
@@ -97,29 +97,35 @@ class FaceTransform(nn.Module):
 
     def __get_T(self, omega, t):
 
+        if not isinstance(omega, Tensor):
+            omega = Tensor(omega)
+
+        if not isinstance(t, Tensor):
+            t = Tensor(t)
+
         z,y,x = omega
 
-        R = np.array([
-            [1, 0,         0         ],
-            [0, np.cos(x), -np.sin(x)],
-            [0, np.sin(x), np.cos(x) ]
-        ]) @ np.array([
-            [np.cos(y),  0 , np.sin(y)],
-            [0,          1,  0        ],
-            [-np.sin(y), 0,  np.cos(y)]
-        ]) @ np.array([
-            [np.cos(z), -np.sin(z), 0],
-            [np.sin(z), np.cos(z),  0],
-            [0,         0,          1]
+        R = Tensor([
+            [1, 0,      0      ],
+            [0, cos(x), -sin(x)],
+            [0, sin(x), cos(x) ]
+        ]) @ Tensor([
+            [cos(y),  0,  sin(y)],
+            [0,       1,  0     ],
+            [-sin(y), 0,  cos(y)]
+        ]) @ Tensor([
+            [cos(z), -sin(z), 0],
+            [sin(z), cos(z),  0],
+            [0,      0,       1]
         ])
 
 
-        return Tensor(np.r_[
-            np.c_[
-                R, np.array(t)[:, None]
-            ],
-            np.array([[0,0,0,1]])
-        ])
+        return cat([
+            cat([
+                R, t[:, None]
+            ], dim=1),
+            Tensor([[0,0,0,1]])
+        ], dim=0)
 
     def forward(self, x, omega, t):
 
