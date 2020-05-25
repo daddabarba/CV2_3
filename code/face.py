@@ -1,3 +1,5 @@
+from torch import nn, Tensor
+
 import numpy as np
 import h5py
 
@@ -5,20 +7,22 @@ from utils import *
 
 # Face basis classes
 
-class FaceComponent:
+class FaceComponent(nn.Module):
 
     def __init__(self, mean : np.ndarray, var : np.ndarray, E : np.ndarray, n : int):
+        super().__init__()
 
-        self.mean = mean.reshape(-1, 3)
-        self.var = np.sqrt(var[:n])
-        self.E = E.reshape(-1, 3, E.shape[-1])[:,:,:n]
+        self.mean = Tensor(mean.reshape(-1, 3))
+        self.var = Tensor(np.sqrt(var[:n]))
+        self.E = Tensor(E.reshape(-1, 3, E.shape[-1])[:,:,:n])
 
-    def __call__(self, z):
+    def forward(self, z):
         return self.mean + self.E @ (self.var * z)
 
-class FaceBasis:
+class FaceBasis(nn.Module):
 
     def __init__(self, id_comp : FaceComponent, exp_comp : FaceComponent, mesh : np.ndarray, color : np.ndarray):
+        super().__init__()
 
         self.id_comp = id_comp
         self.exp_comp = exp_comp
@@ -26,7 +30,7 @@ class FaceBasis:
         self.mesh = mesh
         self.color = color
 
-    def __call__(self, alpha, delta):
+    def forward(self, alpha, delta):
 
         return self.id_comp(alpha) + self.exp_comp(delta)
 
@@ -88,34 +92,37 @@ def get_face_basis(dt : h5py._hl.files.File, size_id, size_exp):
 
 # Face transformations
 
-def __get_T(omega, t):
 
-    z,y,x = omega
+class FaceTransform(nn.Module):
 
-    R = np.array([
-        [1, 0,         0         ],
-        [0, np.cos(x), -np.sin(x)],
-        [0, np.sin(x), np.cos(x) ]
-    ]) @ np.array([
-        [np.cos(y),  0 , np.sin(y)],
-        [0,          1,  0        ],
-        [-np.sin(y), 0,  np.cos(y)]
-    ]) @ np.array([
-        [np.cos(z), -np.sin(z), 0],
-        [np.sin(z), np.cos(z),  0],
-        [0,         0,          1]
-    ])
+    def __get_T(self, omega, t):
+
+        z,y,x = omega
+
+        R = np.array([
+            [1, 0,         0         ],
+            [0, np.cos(x), -np.sin(x)],
+            [0, np.sin(x), np.cos(x) ]
+        ]) @ np.array([
+            [np.cos(y),  0 , np.sin(y)],
+            [0,          1,  0        ],
+            [-np.sin(y), 0,  np.cos(y)]
+        ]) @ np.array([
+            [np.cos(z), -np.sin(z), 0],
+            [np.sin(z), np.cos(z),  0],
+            [0,         0,          1]
+        ])
 
 
-    return np.r_[
-        np.c_[
-            R, np.array(t)[:, None]
-        ],
-        np.array([[0,0,0,1]])
-    ]
+        return Tensor(np.r_[
+            np.c_[
+                R, np.array(t)[:, None]
+            ],
+            np.array([[0,0,0,1]])
+        ])
 
-def FaceTransform(x, omega, t):
+    def forward(self, x, omega, t):
 
-    # Apply transformation matrix
-    return (to_homogeneous(x) @ __get_T(omega, t).T)[:, :3]
+        # Apply transformation matrix
+        return (to_homogeneous(x) @ self.__get_T(omega, t).T)[:, :3]
 

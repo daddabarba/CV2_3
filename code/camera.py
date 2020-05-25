@@ -1,3 +1,5 @@
+from torch import nn, Tensor
+
 import numpy as np
 from utils import *
 
@@ -27,9 +29,10 @@ def get_V(bottom_left : tuple, top_right : tuple):
         [0,       0,       0,   1      ]
     ])
 
-class Camera:
+class Camera(nn.Module):
 
     def __init__(self, fov, aratio, near_far):
+        super().__init__()
 
         n, f = near_far
 
@@ -42,10 +45,10 @@ class Camera:
         bottom_left = (l, b)
         top_right = (r, t)
 
-        self.P = get_P(bottom_left, top_right, near_far)
-        self.V = get_V(bottom_left, top_right)
+        self.P = Tensor(get_P(bottom_left, top_right, near_far))
+        self.V = Tensor(get_V(bottom_left, top_right))
 
-    def __call__(self, x):
+    def forward(self, x):
 
         # Go to homogenous
         x = to_homogeneous(x)
@@ -57,7 +60,7 @@ class Camera:
         x =  x @ self.V.T
 
         # Make homogeneous
-        x /= x[:, 3:4]
+        x = x / x[:, 3:4]
 
         return x[:, :3]
 

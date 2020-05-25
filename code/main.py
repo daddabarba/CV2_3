@@ -23,8 +23,8 @@ def main(args):
 
     # Sample alpha and delta
     print("\tSampling latent variables")
-    alpha = np.random.uniform(-1, 1, args.size_id)
-    delta = np.random.uniform(-1, 1, args.size_exp)
+    alpha = np.random.uniform(-1, 1, args.size_id).astype(np.float32)
+    delta = np.random.uniform(-1, 1, args.size_exp).astype(np.float32)
 
     # Generate face from respective alpha and delta
     print("\tGenerating face 3D point-cloud")
@@ -49,7 +49,8 @@ def main(args):
 
     # Transform face
     print("\tTransforming face with omega: ", args.omega, " and t: ", args.t)
-    face_wt = FaceTransform(face_3D, args.omega, args.t)
+    face_transform = FaceTransform()
+    face_wt = face_transform(face_3D, args.omega, args.t)
 
     print("\tSaving rotated face data")
     save_obj(
@@ -92,7 +93,7 @@ def main(args):
     print("Rendering 2D image")
 
     print("\tExtracting pixels")
-    face_2D = render(face_uv, face_basis.color, face_basis.mesh.astype(np.int))
+    face_2D = render(face_uv.numpy(), face_basis.color, face_basis.mesh.astype(np.int))
 
     plt.imsave(args.face_2D_file, face_2D)
 
