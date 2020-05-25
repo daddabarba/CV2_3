@@ -66,8 +66,8 @@ def main(args):
     print("Applying camera projection")
 
     # Init camera
-    print("\tInitializing camera with bottom-left: ", args.fov[0:2], " top-right: ", args.fov[2:4], " near-far: ", args.fov[4:6])
-    camera = Camera(args.fov[0:2], args.fov[2:4], args.fov[4:6])
+    print("\tInitializing camera with FOV: ", args.fov, " aspect ratio: ", args.aratio, " near-far clips: ", args.near_far)
+    camera = Camera(args.fov, args.aratio, args.near_far)
 
     # Generate image from face
     print("\tGenerating uv image")
@@ -151,10 +151,24 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-fov",
+        type = lambda x : float(x)/180*np.pi,
+        default = 60/180*np.pi,
+        help = "FOV value"
+    )
+
+    parser.add_argument(
+        "--aratio",
         type = float,
-        nargs = 6,
-        default = [0, 0, 10, 10, -10, 10],
-        help = "Far and near clip for projection transformation, in order: l,b,r,t,n,f"
+        default = 2,
+        help = "Aspect ratio of view"
+    )
+
+    parser.add_argument(
+        "--near_far",
+        type = float,
+        nargs = 2,
+        default = [-10, 10],
+        help = "Near far clops z coordinates"
     )
 
     parser.add_argument(

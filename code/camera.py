@@ -29,7 +29,18 @@ def get_V(bottom_left : tuple, top_right : tuple):
 
 class Camera:
 
-    def __init__(self, bottom_left, top_right, near_far):
+    def __init__(self, fov, aratio, near_far):
+
+        n, f = near_far
+
+        t = np.tan(fov/2)*n
+        b = -t
+
+        r = t*aratio
+        l = b*aratio
+
+        bottom_left = (l, b)
+        top_right = (r, t)
 
         self.P = get_P(bottom_left, top_right, near_far)
         self.V = get_V(bottom_left, top_right)
