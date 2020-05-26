@@ -11,5 +11,7 @@ dependencies:
   - zlib=1.2.11
   - pip:
     - dlib==19.19.0
+    - pillow==7.1.2
+    - scipy==1.4.1
 prefix: ~/.conda/envs/cv2
 
