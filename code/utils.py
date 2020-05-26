@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-from scipy import misc
+from PIL import Image
 
 def to_homogeneous(x):
     """
@@ -34,4 +34,7 @@ def im2np(path : str):
     Parameters:
         path (str) : path to image file
     """
-    return misc.imread(path)
+
+    return np.asarray(
+        Image.open(path)
+    )
