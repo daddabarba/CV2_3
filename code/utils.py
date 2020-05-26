@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 from scipy import misc
 
@@ -14,6 +15,17 @@ def to_homogeneous(x):
         return x
 
     return torch.cat([x, torch.ones(x.shape[0], 1)], dim = 1)
+
+def get_landmarks(path : str):
+    """
+    Returns landmark points array from file
+
+    Parameters:
+        path (str) : path to landmark points file
+    """
+
+    with open(path, "rt") as f:
+        return np.array([int(line) for line in f.readlines()])
 
 def im2np(path : str):
     """

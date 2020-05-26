@@ -76,9 +76,7 @@ def main(args):
 
     # Extracting landmark points
     print("\tExtracting landmark pointsi from", args.landmarks)
-
-    with open(args.landmarks, "rt") as f:
-        lmks = np.array([int(line) for line in f.readlines()])
+    lmks = get_landmarks(args.landmarks)
 
     face_lmks = face_uv[lmks, :2]
 
