@@ -1,4 +1,4 @@
-from torch import nn, rand as trand, index_select, LongTensor
+from torch import nn, rand as trand, index_select, LongTensor, Tensor
 from torch.autograd import Variable
 
 from face import *
@@ -10,6 +10,8 @@ from supplemental_code import detect_landmark
 import h5py
 
 from argparse import ArgumentParser
+
+# Models
 
 class RenderPipe(nn.Module):
     def __init__(self, basis : FaceBasis, transform : FaceTransform, camera : Camera):
@@ -57,16 +59,55 @@ class Pipeline(nn.Module):
             index = self.landmarks
         )
 
+# Losses
 
+class LandmarkLoss(nn.Module):
+
+    def forward(self, predicted, target):
+        return ((predicted-target).norm(p=2)**2).mean()
+
+class RegularizationLoss(nn.Module):
+
+    def __init__(self, lambda_alpha : float, lambda_delta : float):
+        super().__init__()
+
+        self.lambda_alpha = lambda_alpha
+        self.lambda_delta = lambda_delta
+
+    def forward(self, alpha, delta):
+        return self.lambda_alpha * (alpha.norm(p=2)**2).sum() + self.lambda_delta * (delta.norm(p=2)**2).sum()
+
+class FitLoss(nn.Module):
+
+    def __init__(self, pipeline : Pipeline, L_lan : LandmarkLoss, L_reg : RegularizationLoss):
+        super().__init__()
+
+        self.pipeline = pipeline
+
+        self.L_lan = L_lan
+        self.L_reg = L_reg
+
+    def forward(self, latent, transform, target):
+
+        return self.L_lan(
+            self.pipeline(
+                *latent,
+                *transform
+            ),
+            target
+        ) + self.L_reg(
+            *latent
+        )
 
 def main(args):
 
     # Get landmarks target points
 
-    target_lmks = detect_landmark(
-        im2np(args.target)
+    target_lmks = Tensor(
+        detect_landmark(
+            im2np(args.target)
+        )
     )
-
 
     # Get full pipeline model
 
@@ -96,7 +137,27 @@ def main(args):
 
     alpha, delta, omega, t = init_latent(args.size_id), init_latent(args.size_exp), init_latent(3), init_latent(3)
 
-    pred = pipeline(alpha, delta, omega, t)
+    # Init Loss module
+    loss = FitLoss(
+        pipeline = pipeline,
+        L_lan = LandmarkLoss(),
+        L_reg = RegularizationLoss(
+            *args.reg
+        )
+    )
+
+    # Test
+    err = loss(
+        (
+            alpha,
+            delta
+        ),
+        (
+            omega,
+            t
+        ),
+        target_lmks
+    )
 
 if __name__ == "__main__":
 
@@ -164,6 +225,23 @@ if __name__ == "__main__":
         nargs = 2,
         default = [-10, 10],
         help = "Near far clops z coordinates"
+    )
+
+    # Training parameters
+
+    parser.add_argument(
+        "--lr",
+        type = float,
+        default = 0.0001,
+        help = "Learning rate"
+    )
+
+    parser.add_argument(
+        "--reg",
+        type = float,
+        nargs = 2,
+        default = [0.1, 0.1],
+        help = "In order, regularization strength for alpha and delta"
     )
 
     main(parser.parse_args())
