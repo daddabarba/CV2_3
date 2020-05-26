@@ -20,7 +20,7 @@ def shape_to_np(shape, dtype="int"):
 
 def detect_landmark(img):
     detector = dlib.get_frontal_face_detector()
-    predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
+    predictor = dlib.shape_predictor("../data/shape_predictor_68_face_landmarks.dat")
 
     # Ask the detector to find the bounding boxes of each face. The 1 in the
     # second argument indicates that we should upsample the image 1 time. This
