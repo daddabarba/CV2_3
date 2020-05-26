@@ -9,6 +9,7 @@ dependencies:
   - python=3.8.3
   - h5py=2.10.0
   - zlib=1.2.11
+  - tqdm=4.46.0
   - pip:
     - dlib==19.19.0
     - pillow==7.1.2
