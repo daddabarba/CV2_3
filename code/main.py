@@ -82,8 +82,16 @@ def main(args):
 
     # Generate image
     plt.scatter(face_lmks[:,0], face_lmks[:, 1])
-    plt.savefig(args.face_uv_file, dpi=900)
-    print("\tSaved to ", args.face_uv_file)
+    plt.savefig(args.face_uv_file + ".png", dpi=900)
+    print("\tSaved to ", args.face_uv_file + ".png")
+
+    save_obj(
+        args.face_uv_file + ".obj",
+        face_uv,
+        face_basis.color,
+        face_basis.mesh
+    )
+    print("\tSaved to ", args.face_uv_file + ".obj")
 
     if args.up_to is not None and args.up_to == "project":
         return
@@ -158,7 +166,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--fov",
         type = lambda x : float(x)/180*np.pi,
-        default = 60/180*np.pi,
+        default = 0.5/180*np.pi,
         help = "FOV value"
     )
 
@@ -194,7 +202,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--face_uv_file",
         type = str,
-        default = "../meshes/face_uv.png",
+        default = "../meshes/face_uv",
         help = "File in which to save uv render of face",
     )
 
