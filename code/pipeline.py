@@ -4,7 +4,8 @@ from torch.autograd import Variable
 from face import *
 from camera import *
 
-from utils import get_landmarks
+from utils import get_landmarks, im2np
+from supplemental_code import detect_landmark
 
 import h5py
 
@@ -56,6 +57,10 @@ class Pipeline(nn.Module):
 def main(args):
 
     # Get landmarks target points
+
+    target_lmks = detect_landmark(
+        im2np(args.target)
+    )
 
 
     # Get full pipeline model
