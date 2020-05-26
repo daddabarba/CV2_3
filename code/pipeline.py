@@ -1,14 +1,16 @@
-from torch import nn, rand as trand
+from torch import nn, rand as trand, index_select, LongTensor
 from torch.autograd import Variable
 
 from face import *
 from camera import *
 
+from utils import get_landmarks
+
 import h5py
 
 from argparse import ArgumentParser
 
-class Pipeline(nn.Module):
+class RenderPipe(nn.Module):
     def __init__(self, basis : FaceBasis, transform : FaceTransform, camera : Camera):
         super().__init__()
 
@@ -29,23 +31,50 @@ class Pipeline(nn.Module):
             )
         )
 
+class Pipeline(nn.Module):
+
+    def __init__(self, renderer : RenderPipe, landmarks : np.ndarray):
+        super().__init__()
+
+        self.renderer = renderer
+        self.landmarks = LongTensor(landmarks)
+
+    def forward(self, alpha, delta, omega, t):
+        return index_select(
+            self.renderer(
+                alpha,
+                delta,
+                omega,
+                t
+            ),
+            dim = 0,
+            index = self.landmarks
+        )
+
+
 
 def main(args):
+
+    # Get landmarks target points
+
 
     # Get full pipeline model
 
     pipeline = Pipeline(
-        basis = get_face_basis(
-            h5py.File(args.prior, 'r'),
-            args.size_id,
-            args.size_exp
+        renderer = RenderPipe(
+            basis = get_face_basis(
+                h5py.File(args.prior, 'r'),
+                args.size_id,
+                args.size_exp
+            ),
+            transform = FaceTransform(),
+            camera = Camera(
+                args.fov,
+                args.aratio,
+                args.near_far
+            )
         ),
-        transform = FaceTransform(),
-        camera = Camera(
-            args.fov,
-            args.aratio,
-            args.near_far
-        )
+        landmarks = get_landmarks(args.landmarks)
     )
 
     # Init random latent variavbles
@@ -62,6 +91,14 @@ def main(args):
 if __name__ == "__main__":
 
     parser = ArgumentParser()
+
+    # Inputs
+
+    parser.add_argument(
+        "--target",
+        type = str,
+        help = "Input image to fit"
+    )
 
     # Data Parameters
 
