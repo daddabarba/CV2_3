@@ -135,7 +135,8 @@ def main(args):
             requires_grad = True
         )
 
-    alpha, delta, omega, t = init_latent(args.size_id), init_latent(args.size_exp), init_latent(3), init_latent(3)
+    latent = init_latent(args.size_id), init_latent(args.size_exp)
+    transform = init_latent(3), init_latent(3)
 
     # Init Loss module
     loss = FitLoss(
@@ -148,14 +149,8 @@ def main(args):
 
     # Test
     err = loss(
-        (
-            alpha,
-            delta
-        ),
-        (
-            omega,
-            t
-        ),
+        latent,
+        transform,
         target_lmks
     )
 
