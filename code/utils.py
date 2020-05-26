@@ -37,4 +37,4 @@ def im2np(path : str):
 
     return np.asarray(
         Image.open(path)
-    )
+    )[:, :, :3]
