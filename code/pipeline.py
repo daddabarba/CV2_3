@@ -1,4 +1,5 @@
 from torch import nn, rand as trand, index_select, LongTensor, Tensor
+from torch.optim import Adam
 from torch.autograd import Variable
 
 from face import *
@@ -10,6 +11,7 @@ from supplemental_code import detect_landmark
 import h5py
 
 from argparse import ArgumentParser
+from tqdm import tqdm
 
 # Models
 
@@ -129,6 +131,7 @@ def main(args):
     )
 
     # Init random latent variavbles
+
     def init_latent(size):
         return Variable(
             trand(size)*2 - 1,
@@ -139,6 +142,7 @@ def main(args):
     transform = init_latent(3), init_latent(3)
 
     # Init Loss module
+
     loss = FitLoss(
         pipeline = pipeline,
         L_lan = LandmarkLoss(),
@@ -147,12 +151,33 @@ def main(args):
         )
     )
 
-    # Test
-    err = loss(
-        latent,
-        transform,
-        target_lmks
-    )
+    # Init optimizer
+
+    optim = Adam(latent + transform, lr = args.lr)
+
+    # Fit latent parameters
+
+    epoch_bar = tqdm(range(args.epochs))
+    for epoch in epoch_bar:
+
+        # Reset gradients
+        optim.zero_grad()
+
+        # Compute loss
+        err = loss (
+            latent,
+            transform,
+            target_lmks
+        )
+
+        # Backpropagate loss
+        err.backward()
+
+        # Update estimate of latent variables
+        optim.step()
+
+        # Display results
+        epoch_bar.set_description("err: %.3f"%err.item())
 
 if __name__ == "__main__":
 
@@ -223,6 +248,13 @@ if __name__ == "__main__":
     )
 
     # Training parameters
+
+    parser.add_argument(
+        "--epochs",
+        type = int,
+        default = 10,
+        help = "Max number of epochs to perform"
+    )
 
     parser.add_argument(
         "--lr",
