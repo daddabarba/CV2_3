@@ -41,13 +41,18 @@ class Pipeline(nn.Module):
         self.landmarks = LongTensor(landmarks)
 
     def forward(self, alpha, delta, omega, t):
+
+        points = self.renderer(
+            alpha,
+            delta,
+            omega,
+            t
+        )
+
+        points = (points / points[:, 2:3])[:, :2]
+
         return index_select(
-            self.renderer(
-                alpha,
-                delta,
-                omega,
-                t
-            ),
+            points ,
             dim = 0,
             index = self.landmarks
         )
