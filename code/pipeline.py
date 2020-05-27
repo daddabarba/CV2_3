@@ -211,6 +211,7 @@ def main(args):
             plt.scatter(target_lmks[:, 0], target_lmks[:, 1], label = "target", color = "r")
 
             plt.legend()
+            plt.axis('equal')
 
             plt.show()
 

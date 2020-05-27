@@ -86,6 +86,7 @@ def main(args):
 
     # Generate image
     plt.scatter(face_lmks[:,0], face_lmks[:, 1])
+    plt.axis('equal')
     plt.savefig(args.face_uv_file + ".png", dpi=900)
     print("\tSaved to ", args.face_uv_file + ".png")
 
