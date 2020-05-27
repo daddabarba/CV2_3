@@ -212,6 +212,8 @@ def main(args):
             plt.scatter(pred[:, 0], pred[:, 1], label = "prediction", color = "b")
             plt.scatter(target_lmks[:, 0], target_lmks[:, 1], label = "target", color = "r")
 
+            plt.legend()
+
             plt.show()
             time.sleep(0.5)
 
