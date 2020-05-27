@@ -74,11 +74,15 @@ def main(args):
     print("\tGenerating uv image")
     face_uv = camera(face_wt)
 
+    print("\tNormalizing uv image (z coordinate)")
+    face_uv_normalizer = FaceUVNormalizer()
+    face_uv_n = face_uv_normalizer(face_uv)
+
     # Extracting landmark points
     print("\tExtracting landmark pointsi from", args.landmarks)
     lmks = get_landmarks(args.landmarks)
 
-    face_lmks = face_uv[lmks, :2]
+    face_lmks = face_uv_n[lmks, :2]
 
     # Generate image
     plt.scatter(face_lmks[:,0], face_lmks[:, 1])
@@ -87,7 +91,7 @@ def main(args):
 
     save_obj(
         args.face_uv_file + ".obj",
-        face_uv,
+        face_uv_n,
         face_basis.color,
         face_basis.mesh
     )
@@ -159,7 +163,7 @@ if __name__ == "__main__":
         "--t",
         type = float,
         nargs = 3,
-        default = [0.0, 0.0, 0.0],
+        default = [0.0, 0.0, -500.0],
         help = "Translation for face transformation"
     )
 
@@ -181,7 +185,7 @@ if __name__ == "__main__":
         "--near_far",
         type = float,
         nargs = 2,
-        default = [-10, 10],
+        default = [-300, -700],
         help = "Near far clops z coordinates"
     )
 
