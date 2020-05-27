@@ -13,7 +13,6 @@ import h5py
 from argparse import ArgumentParser
 from tqdm import tqdm
 
-import time
 from matplotlib import pyplot as plt
 
 # Models
@@ -179,7 +178,6 @@ def main(args):
 
     if args.live_plotting:
         plt.figure()
-        plt.ion()
 
     epoch_bar = tqdm(range(args.epochs))
     for epoch in epoch_bar:
@@ -215,7 +213,6 @@ def main(args):
             plt.legend()
 
             plt.show()
-            time.sleep(0.5)
 
     if args.live_plotting:
         plt.ioff()
