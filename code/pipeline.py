@@ -213,6 +213,7 @@ def main(args):
             plt.scatter(target_lmks[:, 0], target_lmks[:, 1], label = "target", color = "r")
 
             plt.show()
+            time.sleep(0.5)
 
     if args.live_plotting:
         plt.ioff()
