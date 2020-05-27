@@ -13,6 +13,9 @@ import h5py
 from argparse import ArgumentParser
 from tqdm import tqdm
 
+import time
+from matplotlib import pyplot as plt
+
 # Models
 
 class RenderPipe(nn.Module):
@@ -174,6 +177,10 @@ def main(args):
     # Fit latent parameters
     print("Starting to fit latent parameters")
 
+    if args.live_plotting:
+        plt.figure()
+        plt.ion()
+
     epoch_bar = tqdm(range(args.epochs))
     for epoch in epoch_bar:
 
@@ -195,6 +202,20 @@ def main(args):
 
         # Display results
         epoch_bar.set_description("err: %.3f"%err.item())
+
+        # Plot if necessary
+        if args.live_plotting:
+            plt.clf()
+
+            pred = loss.pred.detach().numpy()
+
+            plt.scatter(pred[:, 0], pred[:, 1], label = "prediction", color = "b")
+            plt.scatter(target_lmks[:, 0], target_lmks[:, 1], label = "target", color = "r")
+
+            plt.show()
+
+    if args.live_plotting:
+        plt.ioff()
 
 if __name__ == "__main__":
 
@@ -302,6 +323,15 @@ if __name__ == "__main__":
         nargs = 3,
         default = [0.0, 0.0, -500.0],
         help = "Initial value for translation for face transformation (set to None for random init)"
+    )
+
+    # Other setting
+
+    parser.add_argument(
+        "--live_plotting",
+        type = lambda x : x.lower() == "true",
+        default = False,
+        help = "If set to true it plots the fit of the uv landmark points (at each iteration loop)"
     )
 
     main(parser.parse_args())
