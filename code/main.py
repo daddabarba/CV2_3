@@ -75,8 +75,8 @@ def main(args):
     face_uv = camera(face_wt)
 
     print("\tNormalizing uv image (z coordinate)")
-    face_uv_normalizer = FaceUVNormalizer()
-    face_uv_n = face_uv_normalizer(face_uv)
+    uv_normalizer = UVNormalizer()
+    face_uv_n = uv_normalizer(face_uv)
 
     # Extracting landmark points
     print("\tExtracting landmark pointsi from", args.landmarks)

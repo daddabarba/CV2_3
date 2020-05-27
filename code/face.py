@@ -150,8 +150,3 @@ class FaceTransform(nn.Module):
         # Apply transformation matrix
         return (to_homogeneous(x) @ self.__get_T(omega, t).T)[:, :3]
 
-class FaceUVNormalizer(nn.Module):
-
-    def forward(self, x):
-        return x / -x[:, 2:3]
-

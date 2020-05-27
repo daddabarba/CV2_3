@@ -64,3 +64,7 @@ class Camera(nn.Module):
 
         return x[:, :3]
 
+class UVNormalizer(nn.Module):
+
+    def forward(self, x):
+        return x / -x[:, 2:3]
