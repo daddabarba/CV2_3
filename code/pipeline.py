@@ -1,4 +1,4 @@
-from torch import nn, rand as trand, index_select, LongTensor, Tensor
+from torch import nn, randn as trand, index_select, LongTensor, Tensor
 from torch.optim import Adam
 from torch.autograd import Variable
 
@@ -138,8 +138,18 @@ def main(args):
             requires_grad = True
         )
 
+    def set_latent(val):
+        return Variable(
+            Tensor(
+                np.array(
+                    val
+                )
+            ),
+            requires_grad = True
+        )
+
     latent = init_latent(args.size_id), init_latent(args.size_exp)
-    transform = init_latent(3), init_latent(3)
+    transform = init_latent(3) if args.omega is None else set_latent(args.omega), init_latent(3) if args.t is None else set_latent(args.t)
 
     # Init Loss module
 
@@ -228,7 +238,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--fov",
         type = lambda x : float(x)/180*np.pi,
-        default = 60/180*np.pi,
+        default = 0.5/180*np.pi,
         help = "FOV value"
     )
 
@@ -243,7 +253,7 @@ if __name__ == "__main__":
         "--near_far",
         type = float,
         nargs = 2,
-        default = [-10, 10],
+        default = [-300, -700],
         help = "Near far clops z coordinates"
     )
 
@@ -259,7 +269,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--lr",
         type = float,
-        default = 0.0001,
+        default = 0.01,
         help = "Learning rate"
     )
 
@@ -269,6 +279,22 @@ if __name__ == "__main__":
         nargs = 2,
         default = [0.1, 0.1],
         help = "In order, regularization strength for alpha and delta"
+    )
+
+    parser.add_argument(
+        "--omega",
+        type = lambda x : float(x)/180 * np.pi if x.lower != "None" else None,
+        nargs = 3,
+        default = [0.0, 0.0, 0.0],
+        help = "Initial value for Euler angle in Z-Y-X format for face rotation (set to None for random init)"
+    )
+
+    parser.add_argument(
+        "--t",
+        type = lambda x : float(x) if x.lower != "None" else None,
+        nargs = 3,
+        default = [0.0, 0.0, -500.0],
+        help = "Initial value for translation for face transformation (set to None for random init)"
     )
 
     main(parser.parse_args())
