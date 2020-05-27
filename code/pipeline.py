@@ -112,7 +112,7 @@ def main(args):
     target_lmks = Tensor(
         detect_landmark(
             im2np(args.target)
-        )
+        ) * -1
     )
 
     # Get full pipeline model
