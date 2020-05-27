@@ -90,11 +90,13 @@ class FitLoss(nn.Module):
 
     def forward(self, latent, transform, target):
 
+        self.pred = self.pipeline(
+            *latent,
+            *transform
+        )
+
         return self.L_lan(
-            self.pipeline(
-                *latent,
-                *transform
-            ),
+            self.pred,
             target
         ) + self.L_reg(
             *latent
