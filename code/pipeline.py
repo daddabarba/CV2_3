@@ -16,23 +16,26 @@ from tqdm import tqdm
 # Models
 
 class RenderPipe(nn.Module):
-    def __init__(self, basis : FaceBasis, transform : FaceTransform, camera : Camera):
+    def __init__(self, basis : FaceBasis, transform : FaceTransform, camera : Camera, normalizer : UVNormalizer):
         super().__init__()
 
         self.basis = basis
         self.transform = transform
         self.camera = camera
+        self.normalizer = normalizer
 
     def forward(self, alpha, delta, omega, t):
 
-        return self.camera(
-            self.transform(
-                self.basis(
-                    alpha,
-                    delta
-                ),
-                omega,
-                t
+        return self.normalizer(
+            self.camera(
+                self.transform(
+                    self.basis(
+                        alpha,
+                        delta
+                    ),
+                    omega,
+                    t
+                )
             )
         )
 
@@ -46,17 +49,13 @@ class Pipeline(nn.Module):
 
     def forward(self, alpha, delta, omega, t):
 
-        points = self.renderer(
-            alpha,
-            delta,
-            omega,
-            t
-        )
-
-        points = (points / points[:, 2:3])[:, :2]
-
         return index_select(
-            points ,
+            self.renderer(
+                alpha,
+                delta,
+                omega,
+                t
+            )[:, : 2],
             dim = 0,
             index = self.landmarks
         )
@@ -125,7 +124,8 @@ def main(args):
                 args.fov,
                 args.aratio,
                 args.near_far
-            )
+            ),
+            normalizer = UVNormalizer(),
         ),
         landmarks = get_landmarks(args.landmarks)
     )
