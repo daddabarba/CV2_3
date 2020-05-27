@@ -105,6 +105,7 @@ class FitLoss(nn.Module):
 def main(args):
 
     # Get landmarks target points
+    print("Extracting landmarks from target ", args.target)
 
     target_lmks = Tensor(
         detect_landmark(
@@ -113,6 +114,7 @@ def main(args):
     )
 
     # Get full pipeline model
+    print("Init pipeline model for rendering")
 
     pipeline = Pipeline(
         renderer = RenderPipe(
@@ -132,7 +134,19 @@ def main(args):
         landmarks = get_landmarks(args.landmarks)
     )
 
+    # Init Loss module
+    print("Constructing full loss end-to-end pipeline")
+
+    loss = FitLoss(
+        pipeline = pipeline,
+        L_lan = LandmarkLoss(),
+        L_reg = RegularizationLoss(
+            *args.reg
+        )
+    )
+
     # Init random latent variavbles
+    print("Init latent variables")
 
     def init_latent(size):
         return Variable(
@@ -153,21 +167,12 @@ def main(args):
     latent = init_latent(args.size_id), init_latent(args.size_exp)
     transform = init_latent(3) if args.omega is None else set_latent(args.omega), init_latent(3) if args.t is None else set_latent(args.t)
 
-    # Init Loss module
-
-    loss = FitLoss(
-        pipeline = pipeline,
-        L_lan = LandmarkLoss(),
-        L_reg = RegularizationLoss(
-            *args.reg
-        )
-    )
-
     # Init optimizer
 
     optim = Adam(latent + transform, lr = args.lr)
 
     # Fit latent parameters
+    print("Starting to fit latent parameters")
 
     epoch_bar = tqdm(range(args.epochs))
     for epoch in epoch_bar:
