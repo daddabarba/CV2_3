@@ -10,6 +10,7 @@ from supplemental_code import detect_landmark
 
 import h5py
 import sys
+import pickle
 
 from argparse import ArgumentParser
 from tqdm import tqdm
@@ -207,6 +208,9 @@ def main(args):
     if args.plotting:
         plot_status(loss, latent, transform, target_lmks, title = "Final Setting")
 
+    with open(args.output, "wb") as f:
+        pickle.dump((latent, transform), f)
+
 if __name__ == "__main__":
 
     parser = ArgumentParser()
@@ -224,8 +228,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output",
         type = lambda x : x + ".pkl" if not x.endswith(".pkl") else x,
-        default = None,
-        help = "Output in which to store latent variables, if left to None the values are written in stdout (to be piped and rendered)"
+        default = "fit_latent.pkl",
+        help = "Output in which to store latent variables"
     )
 
     # Data Parameters
