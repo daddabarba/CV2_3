@@ -5,15 +5,14 @@ from torch.autograd import Variable
 from face import *
 from camera import *
 
-from utils import get_landmarks, im2np, torch_norm
+from utils import get_landmarks, im2np, torch_norm, plot_status
 from supplemental_code import detect_landmark
 
 import h5py
+import sys
 
 from argparse import ArgumentParser
 from tqdm import tqdm
-
-from matplotlib import pyplot as plt
 
 # Models
 
@@ -105,27 +104,6 @@ class FitLoss(nn.Module):
         ) + self.L_reg(
             *latent
         )
-
-# Plotting
-def plot_status(loss, latent, transform, target_lmks, title):
-
-    plt.figure()
-
-    err = loss (
-        latent,
-        transform,
-        target_lmks
-    )
-    pred = loss.pred.detach().numpy()
-
-    plt.scatter(pred[:, 0], pred[:, 1], label = "prediction", color = "b")
-    plt.scatter(target_lmks[:, 0], target_lmks[:, 1], label = "target", color = "r")
-
-    plt.title(title)
-    plt.legend()
-    plt.axis('equal')
-
-    plt.show()
 
 def main(args):
 
@@ -239,6 +217,15 @@ if __name__ == "__main__":
         "--target",
         type = str,
         help = "Input image to fit"
+    )
+
+    # Outputs
+
+    parser.add_argument(
+        "--output",
+        type = lambda x : x + ".pkl" if not x.endswith(".pkl") else x,
+        default = None,
+        help = "Output in which to store latent variables, if left to None the values are written in stdout (to be piped and rendered)"
     )
 
     # Data Parameters

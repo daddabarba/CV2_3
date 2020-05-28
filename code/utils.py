@@ -3,6 +3,8 @@ import numpy as np
 
 from PIL import Image
 
+from matplotlib import pyplot as plt
+
 def to_homogeneous(x):
     """
     Adds homogeneous coordinate to input if needed
@@ -45,6 +47,27 @@ def torch_norm(t):
     max_t = torch.max(t, dim=0)[0][None]
 
     return (t-min_t)/(max_t-min_t)
+
+def plot_status(loss, latent, transform, target_lmks, title):
+
+    plt.figure()
+
+    err = loss (
+        latent,
+        transform,
+        target_lmks
+    )
+    pred = loss.pred.detach().numpy()
+
+    plt.scatter(pred[:, 0], pred[:, 1], label = "prediction", color = "b")
+    plt.scatter(target_lmks[:, 0], target_lmks[:, 1], label = "target", color = "r")
+
+    plt.title(title)
+    plt.legend()
+    plt.axis('equal')
+
+    plt.show()
+
 
 
 
