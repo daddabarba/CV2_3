@@ -104,6 +104,27 @@ class FitLoss(nn.Module):
             *latent
         )
 
+# Plotting
+def plot_status(loss, latent, transform, target_lmks, title):
+
+    plt.figure()
+
+    err = loss (
+        latent,
+        transform,
+        target_lmks
+    )
+    pred = loss.pred.detach().numpy()
+
+    plt.scatter(pred[:, 0], pred[:, 1], label = "prediction", color = "b")
+    plt.scatter(target_lmks[:, 0], target_lmks[:, 1], label = "target", color = "r")
+
+    plt.title(title)
+    plt.legend()
+    plt.axis('equal')
+
+    plt.show()
+
 def main(args):
 
     # Get landmarks target points
@@ -176,8 +197,8 @@ def main(args):
     # Fit latent parameters
     print("Starting to fit latent parameters")
 
-    if args.live_plotting:
-        plt.figure()
+    if args.plotting:
+        plot_status(loss, latent, transform, target_lmks, title = "Initial Setting")
 
     epoch_bar = tqdm(range(args.epochs))
     for epoch in epoch_bar:
@@ -201,22 +222,8 @@ def main(args):
         # Display results
         epoch_bar.set_description("err: %.3f"%err.item())
 
-        # Plot if necessary
-        if args.live_plotting:
-            plt.clf()
-
-            pred = loss.pred.detach().numpy()
-
-            plt.scatter(pred[:, 0], pred[:, 1], label = "prediction", color = "b")
-            plt.scatter(target_lmks[:, 0], target_lmks[:, 1], label = "target", color = "r")
-
-            plt.legend()
-            plt.axis('equal')
-
-            plt.show()
-
-    if args.live_plotting:
-        plt.ioff()
+    if args.plotting:
+        plot_status(loss, latent, transform, target_lmks, title = "Final Setting")
 
 if __name__ == "__main__":
 
@@ -282,7 +289,7 @@ if __name__ == "__main__":
         "--near_far",
         type = float,
         nargs = 2,
-        default = [-300, -700],
+        default = [-300, -600],
         help = "Near far clops z coordinates"
     )
 
@@ -329,7 +336,7 @@ if __name__ == "__main__":
     # Other setting
 
     parser.add_argument(
-        "--live_plotting",
+        "--plotting",
         type = lambda x : x.lower() == "true",
         default = False,
         help = "If set to true it plots the fit of the uv landmark points (at each iteration loop)"
