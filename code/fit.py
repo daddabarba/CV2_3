@@ -75,13 +75,15 @@ def main(args):
     print("Init pipeline model for rendering")
 
     pipeline = Pipeline(
-        renderer = RenderPipe(
-            basis = get_face_basis(
-                h5py.File(args.prior, 'r'),
-                args.size_id,
-                args.size_exp
+        renderer = RenderUVPipe(
+            render3D = Render3DPipe(
+                basis = get_face_basis(
+                    h5py.File(args.prior, 'r'),
+                    args.size_id,
+                    args.size_exp
+                ),
+                transform = FaceTransform(),
             ),
-            transform = FaceTransform(),
             camera = Camera(
                 args.fov,
                 args.aratio,
