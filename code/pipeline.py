@@ -50,15 +50,12 @@ class Pipeline(nn.Module):
         self.renderer = renderer
         self.landmarks = LongTensor(landmarks)
 
-    def forward(self, alpha, delta, omega, t):
+    def forward(self, *args):
 
         return torch_norm(
             index_select(
                 self.renderer(
-                    alpha,
-                    delta,
-                    omega,
-                    t
+                    *args
                 )[:, : 2],
                 dim = 0,
                 index = self.landmarks
