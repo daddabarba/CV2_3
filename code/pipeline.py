@@ -5,7 +5,7 @@ from torch.autograd import Variable
 from face import *
 from camera import *
 
-from utils import get_landmarks, im2np
+from utils import get_landmarks, im2np, torch_norm
 from supplemental_code import detect_landmark
 
 import h5py
@@ -51,15 +51,17 @@ class Pipeline(nn.Module):
 
     def forward(self, alpha, delta, omega, t):
 
-        return index_select(
-            self.renderer(
-                alpha,
-                delta,
-                omega,
-                t
-            )[:, : 2],
-            dim = 0,
-            index = self.landmarks
+        return torch_norm(
+            index_select(
+                self.renderer(
+                    alpha,
+                    delta,
+                    omega,
+                    t
+                )[:, : 2],
+                dim = 0,
+                index = self.landmarks
+            )
         )
 
 # Losses
@@ -130,10 +132,12 @@ def main(args):
     # Get landmarks target points
     print("Extracting landmarks from target ", args.target)
 
-    target_lmks = Tensor(
-        detect_landmark(
-            im2np(args.target)
-        ) * -1
+    target_lmks = torch_norm(
+        Tensor(
+            detect_landmark(
+                im2np(args.target)
+            ) * -1
+        )
     )
 
     # Get full pipeline model

@@ -38,3 +38,13 @@ def im2np(path : str):
     return np.asarray(
         Image.open(path)
     )[:, :, :3]
+
+def torch_norm(t):
+
+    min_t = torch.min(t, dim=0)[0][None]
+    max_t = torch.max(t, dim=0)[0][None]
+
+    return (t-min_t)/(max_t-min_t)
+
+
+
