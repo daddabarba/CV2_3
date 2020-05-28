@@ -54,6 +54,25 @@ def torch_norm(t):
 
     return (t-min_t)/(max_t-min_t)
 
+def resize_img_tensor(t, W, H):
+    """
+    Given a tensor of N points (in uv coordinates) resizes width and height
+
+    Prameters:
+        t (torch.Tensor) : an Nx2 set of UV coordinates
+        W (int, float) : new width
+        H (int, float) : new height
+    """
+
+    # first normalize t with axis between 0 and 1
+    t = torch_norm(t)
+
+    # now resize each axis
+    t[:,0] *= W
+    t[:,1] *= H
+
+    return t
+
 def plot_status(pred, target_lmks, title):
     """
     Compares target with predicted landmarks
