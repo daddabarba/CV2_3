@@ -42,22 +42,29 @@ def im2np(path : str):
     )[:, :, :3]
 
 def torch_norm(t):
+    """
+    Given an NxM image, where N is a number of points, normalizes each axis of the set of points (to be between 0 and 1)
+
+    Parameters:
+        t (torch.Tensor) : an NxM (e.g. Nx2) tensor of N (M dimensional) points
+    """
 
     min_t = torch.min(t, dim=0)[0][None]
     max_t = torch.max(t, dim=0)[0][None]
 
     return (t-min_t)/(max_t-min_t)
 
-def plot_status(loss, latent, transform, target_lmks, title):
+def plot_status(pred, target_lmks, title):
+    """
+    Compares target with predicted landmarks
+
+    Parameters:
+        pred (torch.Tensor) : Nx2 matrix of predicted landmarks
+        target_lmks (torch.Tensor) : Nx2 matrix of target landmarks
+        title (str) : title of the plot
+    """
 
     plt.figure()
-
-    err = loss (
-        latent,
-        transform,
-        target_lmks
-    )
-    pred = loss.pred.detach().numpy()
 
     plt.scatter(pred[:, 0], pred[:, 1], label = "prediction", color = "b")
     plt.scatter(target_lmks[:, 0], target_lmks[:, 1], label = "target", color = "r")

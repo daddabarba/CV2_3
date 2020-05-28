@@ -135,7 +135,18 @@ def main(args):
     print("Starting to fit latent parameters")
 
     if args.plotting:
-        plot_status(loss, latent, transform, target_lmks, title = "Initial Setting")
+
+        _ = loss(
+            latent,
+            transform,
+            target_lmks
+        )
+
+        plot_status(
+            loss.pred.detach().numpy(),
+            target_lmks.detach().numpy(),
+            title = "Initial Setting"
+        )
 
     epoch_bar = tqdm(range(args.epochs))
     for epoch in epoch_bar:
@@ -160,7 +171,18 @@ def main(args):
         epoch_bar.set_description("err: %.3f"%err.item())
 
     if args.plotting:
-        plot_status(loss, latent, transform, target_lmks, title = "Final Setting")
+
+        _ = loss(
+            latent,
+            transform,
+            target_lmks
+        )
+
+        plot_status(
+            loss.pred.detach().numpy(),
+            target_lmks.detach().numpy(),
+            title = "Initial Setting"
+        )
 
     with open(args.output, "wb") as f:
         pickle.dump((latent, transform), f)
