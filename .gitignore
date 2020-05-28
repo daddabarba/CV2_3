@@ -3,3 +3,6 @@
 
 # Caches
 **__pycache__**
+
+# Serialized files
+**.pkl
