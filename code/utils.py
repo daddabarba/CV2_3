@@ -41,9 +41,9 @@ def im2np(path : str):
         Image.open(path)
     )[:, :, :3]
 
-def torch_norm(t):
+def torch_norm_transform(t):
     """
-    Given an NxM image, where N is a number of points, normalizes each axis of the set of points (to be between 0 and 1)
+    Given an NxM image, where N is a number of points, retrurns the transformation that normalizes each axis of the set of points (to be between 0 and 1)
 
     Parameters:
         t (torch.Tensor) : an NxM (e.g. Nx2) tensor of N (M dimensional) points
@@ -52,7 +52,19 @@ def torch_norm(t):
     min_t = torch.min(t, dim=0)[0][None]
     max_t = torch.max(t, dim=0)[0][None]
 
-    return (t-min_t)/(max_t-min_t)
+    return 1/(max_t-min_t), -min_t
+
+def torch_norm(t):
+    """
+    Given an NxM image, where N is a number of points, normalizes each axis of the set of points (to be between 0 and 1)
+
+    Parameters:
+        t (torch.Tensor) : an NxM (e.g. Nx2) tensor of N (M dimensional) points
+    """
+
+    scale, translation = torch_norm_transform(t)
+
+    return (t+translation)*scale
 
 def resize_img_tensor(t, W, H):
     """
