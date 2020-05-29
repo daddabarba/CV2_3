@@ -245,7 +245,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--fov",
         type = lambda x : float(x)/180*np.pi,
-        default = 0.5/180*np.pi,
+        default = 0.5,
         help = "FOV value"
     )
 
