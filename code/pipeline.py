@@ -41,20 +41,21 @@ class RenderUVPipe(nn.Module):
 
 class LandmarkPipe(nn.Module):
 
-    def __init__(self , landmarks : np.ndarray):
+    def __init__(self , landmarks : np.ndarray, norm=True):
         super().__init__()
 
         self.landmarks = LongTensor(landmarks)
+        self.norm = norm
 
     def forward(self, pointsUV):
 
-        return torch_norm(
-            index_select(
-                pointsUV,
-                dim = 0,
-                index = self.landmarks
-            )
+        lmks = index_select(
+            pointsUV,
+            dim = 0,
+            index = self.landmarks
         )
+
+        return lmks if not self.norm else torch_norm(lmks)
 
 class Pipeline(nn.Module):
 
