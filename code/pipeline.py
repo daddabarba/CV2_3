@@ -25,39 +25,52 @@ class Render3DPipe(nn.Module):
         )
 
 class RenderUVPipe(nn.Module):
-    def __init__(self, render3D : Render3DPipe, camera : Camera, normalizer : UVNormalizer):
+    def __init__(self, camera : Camera, normalizer : UVNormalizer):
         super().__init__()
 
-        self.render3D = render3D
         self.camera = camera
         self.normalizer = normalizer
 
-    def forward(self, *args):
+    def forward(self, points3D):
 
         return self.normalizer(
             self.camera(
-                self.render3D(
-                    *args
-                )
+                points3D
+            )
+        )
+
+class LandmarkPipe(nn.Module):
+
+    def __init__(self , landmarks : np.ndarray):
+        super().__init__()
+
+        self.landmarks = LongTensor(landmarks)
+
+    def forward(self, pointsUV):
+
+        return torch_norm(
+            index_select(
+                pointsUV[:, :2],
+                dim = 0,
+                index = self.landmarks
             )
         )
 
 class Pipeline(nn.Module):
 
-    def __init__(self, renderer : RenderUVPipe, landmarks : np.ndarray):
+    def __init__(self, renderer3D : Render3DPipe, rendererUV : RenderUVPipe, lmksPipe : LandmarkPipe):
         super().__init__()
 
-        self.renderer = renderer
-        self.landmarks = LongTensor(landmarks)
+        self.renderer3D = renderer3D
+        self.rendererUV = rendererUV
+        self.lmksPipe = lmksPipe
 
     def forward(self, *args):
 
-        return torch_norm(
-            index_select(
-                self.renderer(
+        return self.lmksPipe(
+            self.rendererUV(
+                self.renderer3D(
                     *args
-                )[:, : 2],
-                dim = 0,
-                index = self.landmarks
+                )
             )
         )

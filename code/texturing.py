@@ -54,7 +54,6 @@ def main(args):
     )
 
     renderUV = RenderUVPipe(
-        render3D = render3D,
         camera = Camera(
             args.fov,
             args.aratio,
@@ -63,17 +62,28 @@ def main(args):
         normalizer = UVNormalizer(),
     )
 
-    pipeline = Pipeline(
-        renderer = renderUV,
+    lmksPipe = LandmarkPipe(
         landmarks = get_landmarks(args.landmarks)
     )
 
     # Get predicted landmarks (in image coordinate system)
 
+    points3D = render3D(
+        *latent, *transform
+    ).detach()
+
+    pointsUV = renderUV(
+        points3D
+    ).detach() * -1
+
+    lmks = lmksPipe(
+        pointsUV
+    ).detach()
+
+    # Transform landmarks to image coordinates system
+
     lmks = transformUVBasis(
-        pipeline(
-            *latent, *transform
-        ).detach() * -1,
+        lmks,
         target_lmks
     )
 

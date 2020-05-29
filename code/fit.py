@@ -75,15 +75,15 @@ def main(args):
     print("Init pipeline model for rendering")
 
     pipeline = Pipeline(
-        renderer = RenderUVPipe(
-            render3D = Render3DPipe(
-                basis = get_face_basis(
-                    h5py.File(args.prior, 'r'),
-                    args.size_id,
-                    args.size_exp
-                ),
-                transform = FaceTransform(),
+        renderer3D = Render3DPipe(
+            basis = get_face_basis(
+                h5py.File(args.prior, 'r'),
+                args.size_id,
+                args.size_exp
             ),
+            transform = FaceTransform(),
+        ),
+        rendererUV = RenderUVPipe(
             camera = Camera(
                 args.fov,
                 args.aratio,
@@ -91,7 +91,9 @@ def main(args):
             ),
             normalizer = UVNormalizer(),
         ),
-        landmarks = get_landmarks(args.landmarks)
+        lmksPipe = LandmarkPipe(
+            landmarks = get_landmarks(args.landmarks)
+        )
     )
 
     # Init Loss module
