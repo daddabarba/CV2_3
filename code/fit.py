@@ -32,7 +32,7 @@ class RegularizationLoss(nn.Module):
         self.lambda_delta = lambda_delta
 
     def forward(self, alpha, delta):
-        return self.lambda_alpha * (alpha.norm(p=2)**2).sum() + self.lambda_delta * (delta.norm(p=2)**2).sum()
+        return self.lambda_alpha * (alpha.norm(p=2)**2) + self.lambda_delta * (delta.norm(p=2)**2)
 
 class FitLoss(nn.Module):
 
