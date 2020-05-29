@@ -31,17 +31,17 @@ def interpolate2D(uv, img):
     Performs bilinear interpolation on UV projections to infer color for each point
     """
 
-    y, x = uv.T
+    x, y = uv.T
 
     # Get closest points
-    y1, x1 = np.floor(uv).T.astype(np.int)
-    y2, x2 = np.ceil(uv).T.astype(np.int)
+    x1, y1 = np.floor(uv).T.astype(np.int)
+    x2, y2 = np.ceil(uv).T.astype(np.int)
 
     # Evaluate color function at closest points
-    Q11 = img[x1, y1]
-    Q12 = img[x1, y2]
-    Q21 = img[x2, y1]
-    Q22 = img[x2, y2]
+    Q11 = img[y1, x1]
+    Q12 = img[y1, x2]
+    Q21 = img[y2, x1]
+    Q22 = img[y2, x2]
 
     # Interpolate on x
 
