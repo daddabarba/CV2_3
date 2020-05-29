@@ -181,7 +181,7 @@ def main(args):
         plot_status(
             loss.pred.detach().numpy(),
             target_lmks.detach().numpy(),
-            title = "Initial Setting"
+            title = "Final Setting"
         )
 
     with open(args.output, "wb") as f:
