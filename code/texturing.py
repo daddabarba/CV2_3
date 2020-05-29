@@ -1,13 +1,33 @@
 from torch import Tensor
+import numpy as np
 
 from pipeline import *
 from face import *
 from camera import *
 
+from supplemental_code import detect_landmark
 from utils import resize_img_tensor, im2np, torch_norm
 import pickle
 
+from matplotlib import pyplot as plt
+
 from argparse import ArgumentParser
+
+def transformUVBasis(lmks, target_img):
+    """
+    Transform predicted landmarks to same coordinate system of picture (target landmarks)
+    """
+
+    target_lmks = detect_landmark(
+        target_img
+    )
+
+    min_lmks = np.min(target_lmks, axis=0)
+    max_lmks = np.max(target_lmks, axis=0)
+
+    scale = max_lmks - min_lmks
+
+    return resize_img_tensor(lmks, *(scale)) + min_lmks[None]
 
 def main(args):
 
@@ -15,7 +35,7 @@ def main(args):
 
     target_img = Tensor(
         im2np(args.target)
-    )
+    ).int()
 
     # Read latent variables
 
@@ -34,7 +54,6 @@ def main(args):
         transform = FaceTransform(),
     )
 
-
     renderUV = RenderUVPipe(
         render3D = render3D,
         camera = Camera(
@@ -49,6 +68,26 @@ def main(args):
         renderer = renderUV,
         landmarks = get_landmarks(args.landmarks)
     )
+
+    # Get predicted landmarks (in image coordinate system)
+    lmks = transformUVBasis(
+        pipeline(
+            *latent, *transform
+        ).detach() * -1,
+        target_img.detach().numpy().astype(np.uint8)
+    )
+
+    # Plot landmarks on picture
+
+    plt.imshow(target_img.detach().numpy())
+    plt.scatter(
+        lmks[:,0], lmks[:,1],
+        label = "pred",
+        color = "b"
+    )
+
+    plt.show()
+    plt.legend
 
 
 if __name__ == "__main__":
