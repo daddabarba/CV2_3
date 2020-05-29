@@ -7,6 +7,7 @@ from camera import *
 
 from supplemental_code import detect_landmark
 from utils import resize_img_tensor, im2np, torch_norm
+from supplemental_code import save_obj
 import pickle
 
 from matplotlib import pyplot as plt
@@ -25,18 +26,48 @@ def transformUVBasis(lmks, target_lmks):
 
     return resize_img_tensor(lmks, *(scale)) + min_lmks[None]
 
+def interpolate2D(uv, img):
+    """
+    Performs bilinear interpolation on UV projections to infer color for each point
+    """
+
+    y, x = uv.T
+
+    # Get closest points
+    y1, x1 = np.floor(uv).T.astype(np.int)
+    y2, x2 = np.ceil(uv).T.astype(np.int)
+
+    # Evaluate color function at closest points
+    Q11 = img[x1, y1]
+    Q12 = img[x1, y2]
+    Q21 = img[x2, y1]
+    Q22 = img[x2, y2]
+
+    # Interpolate on x
+
+    n = x2-x1
+    alpha, beta = ((x2-x)/n)[:, None], ((x-x1)/n)[:, None]
+
+    fxy1 = alpha*Q11 + beta*Q21
+    fxy2 = alpha*Q12 + beta*Q22
+
+    # Interpolate on y
+
+    n = y2-y1
+    alpha, beta = ((y2-y)/n)[:, None], ((y-y1)/n)[:, None]
+
+    return alpha*fxy1 + beta*fxy2
+
 def main(args):
 
     # Read image
 
     print("Extracting targets ... ", end="")
 
-    target_img = Tensor(
-        im2np(args.target)
-    ).int()
+    target_img = im2np(args.target)
 
     target_lmks = detect_landmark(
-        target_img.detach().numpy().astype(np.uint8)
+        target_img
     )
 
     print("done")
@@ -111,7 +142,7 @@ def main(args):
 
     # Plot landmarks on picture
 
-    plt.imshow(target_img.detach().numpy())
+    plt.imshow(target_img)
     plt.scatter(
         lmks[:,0], lmks[:,1],
         label = "pred",
@@ -120,6 +151,29 @@ def main(args):
 
     plt.show()
     plt.legend
+
+    # Transform UV coordinates in image coordinates
+
+    print("Interpolating colors ... ", end="")
+
+    pointsUV = transformUVBasis(
+        pointsUV,
+        target_lmks
+    )
+
+    color = interpolate2D(
+        pointsUV.numpy(),
+        target_img
+    )
+
+    # Save 3D model
+
+    save_obj(
+        "../meshes/test.obj",
+        points3D,
+        color,
+        render3D.basis.mesh
+    )
 
     print("done")
 
