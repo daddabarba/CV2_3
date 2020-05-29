@@ -37,7 +37,7 @@ class RenderUVPipe(nn.Module):
             self.camera(
                 points3D
             )
-        )
+        )[:, :2]
 
 class LandmarkPipe(nn.Module):
 
@@ -50,7 +50,7 @@ class LandmarkPipe(nn.Module):
 
         return torch_norm(
             index_select(
-                pointsUV[:, :2],
+                pointsUV,
                 dim = 0,
                 index = self.landmarks
             )
