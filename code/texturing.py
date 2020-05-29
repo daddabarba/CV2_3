@@ -28,7 +28,8 @@ def transformUVBasis(lmks, target_lmks):
 def main(args):
 
     # Read image
-    print("Extracting targets...", end="")
+
+    print("Extracting targets ... ", end="")
 
     target_img = Tensor(
         im2np(args.target)
@@ -41,7 +42,8 @@ def main(args):
     print("done")
 
     # Read latent variables
-    print("Loading latent variables values...", end="")
+
+    print("Loading latent variables values ... ", end="")
 
     with open(args.latent, "rb") as f:
         latent, transform = pickle.load(f)
@@ -49,7 +51,8 @@ def main(args):
     print("done")
 
     # Init model's Pipeline
-    print("Building sparse pipeline model...", end="")
+
+    print("Building sparse pipeline model ... ", end="")
 
     render3D = Render3DPipe(
         basis = get_face_basis(
@@ -76,28 +79,30 @@ def main(args):
     print("done")
 
     # Get predicted landmarks (in image coordinate system)
+
     print("Predicting features")
 
-    print("\tPredicting 3D render...", end="")
+    print("\tPredicting 3D render ... ", end="")
     points3D = render3D(
         *latent, *transform
     ).detach()
     print("done")
 
-    print("\tPredicting UV points...", end="")
+    print("\tPredicting UV points ... ", end="")
     pointsUV = renderUV(
         points3D
     ).detach() * -1
     print("done")
 
-    print("\tPredicting landmarks...", end="")
+    print("\tPredicting landmarks ... ", end="")
     lmks = lmksPipe(
         pointsUV
     ).detach()
     print("done")
 
     # Transform landmarks to image coordinates system
-    print("Showing predicted landmarks on picture coordinates...", end="")
+
+    print("Showing predicted landmarks on picture coordinates ... ", end="")
 
     lmks = transformUVBasis(
         lmks,
