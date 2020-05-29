@@ -180,7 +180,7 @@ def main(args):
     # Save 3D model
 
     save_obj(
-        "../meshes/test.obj",
+        args.output,
         points3D,
         color,
         render3D.basis.mesh
@@ -205,6 +205,15 @@ if __name__ == "__main__":
         type = lambda x : x + ".pkl" if not x.endswith(".pkl") else x,
         default = "fit_latent.pkl",
         help = "Input which contains latent variables values"
+    )
+
+    # Output
+
+    parser.add_argument(
+        "--output",
+        type = str,
+        default = "../meshes/face_texture.obj",
+        help = "Location in which to save .obj file"
     )
 
     # Data Parameters
