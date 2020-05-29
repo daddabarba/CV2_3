@@ -13,14 +13,10 @@ from matplotlib import pyplot as plt
 
 from argparse import ArgumentParser
 
-def transformUVBasis(lmks, target_img):
+def transformUVBasis(lmks, target_lmks):
     """
     Transform predicted landmarks to same coordinate system of picture (target landmarks)
     """
-
-    target_lmks = detect_landmark(
-        target_img
-    )
 
     min_lmks = np.min(target_lmks, axis=0)
     max_lmks = np.max(target_lmks, axis=0)
@@ -37,11 +33,14 @@ def main(args):
         im2np(args.target)
     ).int()
 
+    target_lmks = detect_landmark(
+        target_img.detach().numpy().astype(np.uint8)
+    )
+
     # Read latent variables
 
     with open(args.latent, "rb") as f:
         latent, transform = pickle.load(f)
-
 
     # Init model's Pipeline
 
@@ -70,11 +69,12 @@ def main(args):
     )
 
     # Get predicted landmarks (in image coordinate system)
+
     lmks = transformUVBasis(
         pipeline(
             *latent, *transform
         ).detach() * -1,
-        target_img.detach().numpy().astype(np.uint8)
+        target_lmks
     )
 
     # Plot landmarks on picture
