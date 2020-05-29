@@ -6,7 +6,7 @@ from face import *
 from camera import *
 
 from supplemental_code import detect_landmark
-from utils import resize_img_tensor, im2np, torch_norm
+from utils import resize_img_tensor, im2np
 from supplemental_code import save_obj
 import pickle
 
@@ -22,9 +22,9 @@ def transformUVBasis(lmks, target_lmks):
     min_lmks = np.min(target_lmks, axis=0)
     max_lmks = np.max(target_lmks, axis=0)
 
-    scale = max_lmks - min_lmks
+    scale = (max_lmks - min_lmks)[None]
 
-    return resize_img_tensor(lmks, *(scale)) + min_lmks[None]
+    return lmks*scale + min_lmks[None]
 
 def interpolate2D(uv, img):
     """
@@ -104,7 +104,8 @@ def main(args):
     )
 
     lmksPipe = LandmarkPipe(
-        landmarks = get_landmarks(args.landmarks)
+        landmarks = get_landmarks(args.landmarks),
+        norm = False
     )
 
     print("done")
@@ -129,6 +130,16 @@ def main(args):
     lmks = lmksPipe(
         pointsUV
     ).detach()
+    print("done")
+
+    # Get normalization transform to normalize lmks and pointsUV in the same basis
+    print("Normalization ... ", end="")
+
+    scale, t = torch_norm_transform(lmks)
+
+    lmks = (lmks+t)*scale
+    pointsUV = (pointsUV+t)*scale
+
     print("done")
 
     # Transform landmarks to image coordinates system
