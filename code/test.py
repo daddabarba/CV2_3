@@ -187,7 +187,7 @@ if __name__ == "__main__":
         type = float,
         nargs = 2,
         default = [-300, -700],
-        help = "Near far clops z coordinates"
+        help = "Near far clips z coordinates"
     )
 
     parser.add_argument(
@@ -208,7 +208,7 @@ if __name__ == "__main__":
         "--face_uv_file",
         type = str,
         default = "../meshes/face_uv",
-        help = "File in which to save uv render of face",
+        help = "File in which to save uv render of face (both as png and obj file)",
     )
 
     parser.add_argument(
