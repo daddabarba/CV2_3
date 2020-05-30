@@ -180,10 +180,39 @@ def main(args):
     # Save 3D model
 
     save_obj(
-        args.output,
+        args.pointcloud + ".obj",
+        points3D,
+        render3D.basis.color,
+        render3D.basis.mesh
+    )
+
+    face_uv = Camera(args.fov, args.aratio, args.near_far)(points3D)
+
+    plt.imsave(
+        args.pointcloud + ".png",
+        wrap_render(
+            face_uv,
+            render3D.basis.color,
+            render3D.basis.mesh
+        ),
+    )
+
+    # Save textured 3D model
+
+    save_obj(
+        args.output + ".obj",
         points3D,
         color,
         render3D.basis.mesh
+    )
+
+    plt.imsave(
+        args.output + ".png",
+        wrap_render(
+            face_uv,
+            color/255,
+            render3D.basis.mesh
+        ),
     )
 
     print("done")
@@ -210,10 +239,17 @@ if __name__ == "__main__":
     # Output
 
     parser.add_argument(
+        "--pointcloud",
+        type = str,
+        default = "../meshes/face_untextured",
+        help = "Location in which to save .obj file of the face without texture (using provided colors). The same name (.png) is used for the rendered version of the PC"
+    )
+
+    parser.add_argument(
         "--output",
         type = str,
-        default = "../meshes/face_texture.obj",
-        help = "Location in which to save .obj file"
+        default = "../meshes/face_texture",
+        help = "Location in which to save .obj file.  The same name (.png) is used for the rendered version of the PC"
     )
 
     # Data Parameters
