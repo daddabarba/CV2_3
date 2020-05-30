@@ -116,7 +116,8 @@ def main(args):
 
     print("\tPredicting 3D render ... ", end="")
     points3D = render3D(
-        *latent, *transform
+        *latent,
+        *transform
     ).detach()
     print("done")
 
@@ -176,6 +177,19 @@ def main(args):
         pointsUV.numpy(),
         target_img
     )
+
+    # Apply new transformation
+
+    if args.omega is not None:
+        transform = Tensor(args.omega), transform[1]
+
+    if args.t is not None:
+        transform = transfrom[0], Tensor(args.t)
+
+    points3D = render3D(
+        *latent,
+        *transform
+    ).detach()
 
     # Save 3D model
 
@@ -282,6 +296,24 @@ if __name__ == "__main__":
         type = int,
         default = 20,
         help = "Number of components for exp basis"
+    )
+
+    # Transformation parameters
+
+    parser.add_argument(
+        "--omega",
+        type = lambda x : float(x)/180 * np.pi if x.lower != "None" else None,
+        nargs = 3,
+        default = None,
+        help = "Initial value for Euler angle in Z-Y-X format for face rotation (set to None for random init)"
+    )
+
+    parser.add_argument(
+        "--t",
+        type = lambda x : float(x) if x.lower != "None" else None,
+        nargs = 3,
+        default = None,
+        help = "Initial value for translation for face transformation (set to None for random init)"
     )
 
     # Camera parameters
