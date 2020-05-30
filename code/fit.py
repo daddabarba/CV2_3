@@ -61,24 +61,28 @@ class FitLoss(nn.Module):
 def main(args):
 
     # Get landmarks target points
-    print("Extracting landmarks from target ", args.target)
 
-    target_img = im2np(args.target)
+    target_lmks = []
 
-    target_lmks = Tensor(
-        detect_landmark(
-            target_img
+    for target in args.targets:
+
+        print("Extracting landmarks from target ", target)
+        target_img = im2np(target)
+
+        target = Tensor(
+            detect_landmark(
+                target_img
+            )
         )
-    )
 
-    if args.plotting:
-        plt.imshow(target_img)
-        lmks = target_lmks.detach().numpy()
-        plt.scatter(lmks[:,0], lmks[:,1])
+        if args.plotting:
+            plt.imshow(target_img)
+            lmks = target.detach().numpy()
+            plt.scatter(lmks[:,0], lmks[:,1])
 
-        plt.show()
+            plt.show()
 
-    target_lmks = torch_norm(target_lmks*-1)
+        target_lmks.append(torch_norm(target*-1))
 
     # Get full pipeline model
     print("Init pipeline model for rendering")
@@ -136,28 +140,34 @@ def main(args):
         )
 
     latent = init_latent(args.size_id), init_latent(args.size_exp)
-    transform = init_latent(3) if args.omega is None else set_latent(args.omega), init_latent(3) if args.t is None else set_latent(args.t)
+
+    transforms = []
+
+    for _ in range(len(args.targets)):
+        transforms.append((init_latent(3) if args.omega is None else set_latent(args.omega), init_latent(3) if args.t is None else set_latent(args.t)))
 
     # Init optimizer
 
-    optim = Adam(latent + transform, lr = args.lr)
+    optim = Adam(latent + tuple(i for transform in transforms for i in transform), lr = args.lr)
 
     # Fit latent parameters
     print("Starting to fit latent parameters")
 
     if args.plotting:
 
-        _ = loss(
-            latent,
-            transform,
-            target_lmks
-        )
+        for transform, target in zip(transforms, target_lmks):
 
-        plot_status(
-            loss.pred.detach().numpy(),
-            target_lmks.detach().numpy(),
-            title = "Initial Setting"
-        )
+            _ = loss(
+                latent,
+                transform,
+                target
+            )
+
+            plot_status(
+                loss.pred.detach().numpy(),
+                target.detach().numpy(),
+                title = "Initial Setting"
+            )
 
     epoch_bar = tqdm(range(args.epochs))
     for epoch in epoch_bar:
@@ -165,38 +175,44 @@ def main(args):
         # Reset gradients
         optim.zero_grad()
 
-        # Compute loss
-        err = loss (
-            latent,
-            transform,
-            target_lmks
-        )
+        err_tot = 0
+        for transform, target in zip(transforms, target_lmks):
 
-        # Backpropagate loss
-        err.backward()
+            # Compute loss
+            err = loss (
+                latent,
+                transform,
+                target
+            )
+
+            # Backpropagate loss
+            err.backward()
+
+            err_tot += err.item()
 
         # Update estimate of latent variables
         optim.step()
 
         # Display results
-        epoch_bar.set_description("err: %.3f"%err.item())
+        epoch_bar.set_description("err: %.3f"%(err_tot/len(args.targets)))
 
     if args.plotting:
+        for transform, target in zip(transforms, target_lmks):
 
-        _ = loss(
-            latent,
-            transform,
-            target_lmks
-        )
+            _ = loss(
+                latent,
+                transform,
+                target
+            )
 
-        plot_status(
-            loss.pred.detach().numpy(),
-            target_lmks.detach().numpy(),
-            title = "Final Setting"
-        )
+            plot_status(
+                loss.pred.detach().numpy(),
+                target.detach().numpy(),
+                title = "Final Setting"
+            )
 
     with open(args.output, "wb") as f:
-        pickle.dump((latent, transform), f)
+        pickle.dump((latent, transforms), f)
 
 if __name__ == "__main__":
 
@@ -205,8 +221,9 @@ if __name__ == "__main__":
     # Inputs
 
     parser.add_argument(
-        "--target",
+        "--targets",
         type = str,
+        nargs = "+",
         help = "Input image to fit"
     )
 

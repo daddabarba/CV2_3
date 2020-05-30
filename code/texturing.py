@@ -64,11 +64,21 @@ def main(args):
 
     print("Extracting targets ... ", end="")
 
-    target_img = im2np(args.target)
+    targets = []
+    target_imgs = []
+    for target in args.targets:
 
-    target_lmks = detect_landmark(
-        target_img
-    )
+        target_imgs.append(
+            im2np(
+                target
+            )
+        )
+
+        targets.append(
+            detect_landmark(
+                target_imgs[-1]
+            )
+        )
 
     print("done")
 
@@ -77,7 +87,7 @@ def main(args):
     print("Loading latent variables values ... ", end="")
 
     with open(args.latent, "rb") as f:
-        latent, transform = pickle.load(f)
+        latent, transforms = pickle.load(f)
 
     print("done")
 
@@ -112,124 +122,130 @@ def main(args):
 
     # Get predicted landmarks (in image coordinate system)
 
-    print("Predicting features")
+    for i, (target_img, transform, target_lmks) in enumerate(zip(target_imgs, transforms, targets)):
 
-    print("\tPredicting 3D render ... ", end="")
-    points3D = render3D(
-        *latent,
-        *transform
-    ).detach()
-    print("done")
+        print("Texturing ", args.targets[i])
 
-    print("\tPredicting UV points ... ", end="")
-    pointsUV = renderUV(
-        points3D
-    ).detach() * -1
-    print("done")
+        print("Predicting features")
 
-    print("\tPredicting landmarks ... ", end="")
-    lmks = lmksPipe(
-        pointsUV
-    ).detach()
-    print("done")
+        print("\tPredicting 3D render ... ", end="")
+        points3D = render3D(
+            *latent,
+            *transform
+        ).detach()
+        print("done")
 
-    # Get normalization transform to normalize lmks and pointsUV in the same basis
-    print("Normalization ... ", end="")
+        print("\tPredicting UV points ... ", end="")
+        pointsUV = renderUV(
+            points3D
+        ).detach() * -1
+        print("done")
 
-    scale, t = torch_norm_transform(lmks)
+        print("\tPredicting landmarks ... ", end="")
+        lmks = lmksPipe(
+            pointsUV
+        ).detach()
+        print("done")
 
-    lmks = (lmks+t)*scale
-    pointsUV = (pointsUV+t)*scale
+        # Get normalization transform to normalize lmks and pointsUV in the same basis
+        print("Normalization ... ", end="")
 
-    print("done")
+        scale, t = torch_norm_transform(lmks)
 
-    # Transform landmarks to image coordinates system
+        lmks = (lmks+t)*scale
+        pointsUV = (pointsUV+t)*scale
 
-    print("Showing predicted landmarks on picture coordinates ... ", end="")
+        print("done")
 
-    lmks = transformUVBasis(
-        lmks,
-        target_lmks
-    )
+        # Transform landmarks to image coordinates system
 
-    # Plot landmarks on picture
+        print("Showing predicted landmarks on picture coordinates ... ", end="")
 
-    plt.imshow(target_img)
-    plt.scatter(
-        lmks[:,0], lmks[:,1],
-        label = "pred",
-        color = "b"
-    )
+        lmks = transformUVBasis(
+            lmks,
+            target_lmks
+        )
 
-    plt.show()
-    plt.legend
+        # Plot landmarks on picture
 
-    # Transform UV coordinates in image coordinates
+        plt.imshow(target_img)
+        plt.scatter(
+            lmks[:,0], lmks[:,1],
+            label = "pred",
+            color = "b"
+        )
 
-    print("Interpolating colors ... ", end="")
+        plt.show()
+        plt.legend
 
-    pointsUV = transformUVBasis(
-        pointsUV,
-        target_lmks
-    )
+        # Transform UV coordinates in image coordinates
 
-    color = interpolate2D(
-        pointsUV.numpy(),
-        target_img
-    )
+        print("Interpolating colors ... ", end="")
 
-    # Apply new transformation
+        pointsUV = transformUVBasis(
+            pointsUV,
+            target_lmks
+        )
 
-    if args.omega is not None:
-        transform = Tensor(args.omega), transform[1]
+        color = interpolate2D(
+            pointsUV.numpy(),
+            target_img
+        )
 
-    if args.t is not None:
-        transform = transfrom[0], Tensor(args.t)
+        # Apply new transformation
 
-    points3D = render3D(
-        *latent,
-        *transform
-    ).detach()
+        if args.omega is not None:
+            transform = Tensor(args.omega), transform[1]
 
-    # Save 3D model
+        if args.t is not None:
+            transform = transfrom[0], Tensor(args.t)
 
-    save_obj(
-        args.pointcloud + ".obj",
-        points3D,
-        render3D.basis.color,
-        render3D.basis.mesh
-    )
+        points3D = render3D(
+            *latent,
+            *transform
+        ).detach()
 
-    face_uv = Camera(args.fov, args.aratio, args.near_far)(points3D)
+        # Save 3D model
 
-    plt.imsave(
-        args.pointcloud + ".png",
-        wrap_render(
-            face_uv,
+        suffix = "" if len(args.targets)==1 else "_"+str(i)
+
+        save_obj(
+            args.pointcloud + suffix + ".obj",
+            points3D,
             render3D.basis.color,
             render3D.basis.mesh
-        ),
-    )
+        )
 
-    # Save textured 3D model
+        face_uv = Camera(args.fov, args.aratio, args.near_far)(points3D)
 
-    save_obj(
-        args.output + ".obj",
-        points3D,
-        color,
-        render3D.basis.mesh
-    )
+        plt.imsave(
+            args.pointcloud + suffix + ".png",
+            wrap_render(
+                face_uv,
+                render3D.basis.color,
+                render3D.basis.mesh
+            ),
+        )
 
-    plt.imsave(
-        args.output + ".png",
-        wrap_render(
-            face_uv,
-            color/255,
+        # Save textured 3D model
+
+        save_obj(
+            args.output + suffix + ".obj",
+            points3D,
+            color,
             render3D.basis.mesh
-        ),
-    )
+        )
 
-    print("done")
+        plt.imsave(
+            args.output + suffix + ".png",
+            wrap_render(
+                face_uv,
+                color/255,
+                render3D.basis.mesh
+            ),
+        )
+
+        print("done")
 
 if __name__ == "__main__":
 
@@ -238,8 +254,9 @@ if __name__ == "__main__":
     # Inputs
 
     parser.add_argument(
-        "--target",
+        "--targets",
         type = str,
+        nargs = "+",
         help = "Input image to fit"
     )
 
