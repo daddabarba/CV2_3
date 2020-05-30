@@ -8,6 +8,8 @@ import h5py
 from matplotlib import pyplot as plt
 import numpy as np
 
+import pickle
+
 from argparse import ArgumentParser
 
 def main(args):
@@ -23,8 +25,15 @@ def main(args):
 
     # Sample alpha and delta
     print("\tSampling latent variables")
-    alpha = np.random.uniform(-1, 1, args.size_id).astype(np.float32)
-    delta = np.random.uniform(-1, 1, args.size_exp).astype(np.float32)
+
+    if args.latent is None:
+        alpha = np.random.uniform(-1, 1, args.size_id).astype(np.float32)
+        delta = np.random.uniform(-1, 1, args.size_exp).astype(np.float32)
+    else:
+        with open(args.latent, "rb") as f:
+            (alpha, delta), _ = pickle.load(f)
+
+            alpha, delta = alpha.detach().numpy(), delta.detach().numpy()
 
     # Generate face from respective alpha and delta
     print("\tGenerating face 3D point-cloud")
@@ -140,6 +149,13 @@ if __name__ == "__main__":
         type = int,
         default = 20,
         help = "Number of components for exp basis"
+    )
+
+    parser.add_argument(
+        "--latent",
+        type = lambda x : x + ".pkl" if not x.endswith(".pkl") else x,
+        default = None,
+        help = "Input which contains latent variables values"
     )
 
     # Parameters Section 2
