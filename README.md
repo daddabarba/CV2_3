@@ -98,6 +98,7 @@ The script `fit.py` serves the purpose of running only this section. The paramet
 
 ```
 python3 fit.py --target ../faces/woman.jpeg --output ../latent/woman.pkl --plotting True --epochs 1000
+python3 fit.py --target ../faces/putin.png --output ../latent/putin.pkl --plotting True --epochs 1000
 ```
 
 This script will only find the parameters of a given face. The rendering is done in the following section.
@@ -108,6 +109,13 @@ The script `texturing.py` can be used for this purpose. For instance, to render 
 
 ```
 python3 texturing.py --target ../faces/woman.jpeg --latent ../latent/woman.pkl
+```
+
+for the woman or
+
+
+```
+python3 texturing.py --target ../faces/putin.png --latent ../latent/putin.pkl
 ```
 
 This will generate 4 files:
