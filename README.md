@@ -14,6 +14,8 @@ You will also need to download [BFM model](https://faces.dmi.unibas.ch/bfm/bfm20
 
 ## Scripts
 
+When running the scripts please move in the directory `code`.
+
 ### test.py
 
 This script manually constructs the pipeline required for sections 2 (Morphable Model) and 3 (Pinhole camera model). Please run `fit.py --help` to see the arguments available. 
