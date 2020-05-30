@@ -66,6 +66,19 @@ def torch_norm(t):
 
     return (t+translation)*scale
 
+def get_WH_from_UV(t):
+    """
+    Returns width and height of image encoded in series of uv coordinates
+
+    Prameters:
+        t (torch.Tensor) : an Nx2 set of UV coordinates
+    """
+
+    W_t = torch.max(t[:,0]) - torch.min(t[:,0])
+    H_t = torch.max(t[:,1]) - torch.min(t[:,1])
+
+    return W_t, H_t
+
 def resize_img_tensor(t, W, H):
     """
     Given a tensor of N points (in uv coordinates) resizes width and height
@@ -77,6 +90,14 @@ def resize_img_tensor(t, W, H):
     """
 
     # first normalize t with axis between 0 and 1
+
+    if H is None:
+
+        #maintain aspect ratio
+
+        W_t, H_t = get_WH_from_UV(t)
+        H = int(W* (H_t/W_t))
+
     t = torch_norm(t)
 
     # now resize each axis
