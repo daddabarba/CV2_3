@@ -206,7 +206,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output",
         type = lambda x : x + ".pkl" if not x.endswith(".pkl") else x,
-        default = "fit_latent.pkl",
+        default = "latent/fit_latent.pkl",
         help = "Output in which to store latent variables"
     )
 
