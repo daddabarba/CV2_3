@@ -48,6 +48,8 @@ This script takes a file with serialized latent variables (extracted by `fit.py`
 
 `--target` can be used to specify the path to the image file (used as target), while `--latent` will need to point to the binary file containing the latent variables inferred (*alpha*, *delta*, *omega*, and *t*). `--output` can be used to specify the name of the outout image and 3D mesh (the same name with different extensions will be used).
 
+A rotation `--omega` and translation `--t` can be specified. These will be used to override the inferred ones before rendering (but after getting the texture).
+
 The remaining parameters can be left to default, and have the same use as in the previous scripts.
 
 ### Other Scripts
@@ -109,20 +111,20 @@ This script will only find the parameters of a given face. The rendering is done
 The script `texturing.py` can be used for this purpose. For instance, to render (with and without texture) the latent parameters used in the example for the previous section, simply run
 
 ```
-python3 texturing.py --target ../faces/woman.jpeg --latent ../latent/woman.pkl
+python3 texturing.py --target ../faces/woman.jpeg --latent ../latent/woman.pkl --omega 0 20 0
 ```
 
 for the woman,
 
 
 ```
-python3 texturing.py --target ../faces/putin.png --latent ../latent/putin.pkl
+python3 texturing.py --target ../faces/putin.png --latent ../latent/putin.pkl --omega 0 20 0
 ```
 
 for putin, or
 
 ```
-python3 texturing.py --target ../faces/me.jpg --latent ../latent/me.pkl
+python3 texturing.py --target ../faces/me.jpg --latent ../latent/me.pkl --omega 0 20 0
 ```
 
 for my own face.
