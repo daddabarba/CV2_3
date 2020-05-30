@@ -2,6 +2,7 @@ import torch
 import numpy as np
 
 from PIL import Image
+from supplemental_code import render
 
 from matplotlib import pyplot as plt
 
@@ -105,6 +106,13 @@ def resize_img_tensor(t, W, H):
     t[:,1] *= H
 
     return t
+
+def wrap_render(face_uv, color, mesh):
+
+    face_2D = resize_img_tensor(face_uv, 480, None)
+    W_t, H_t  = get_WH_from_UV(face_2D)
+
+    return render(face_2D.numpy(), color, mesh.astype(np.int), int(H_t), int(W_t))
 
 def plot_status(pred, target_lmks, title):
     """

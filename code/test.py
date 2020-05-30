@@ -105,10 +105,7 @@ def main(args):
 
     print("\tExtracting pixels")
 
-    face_2D = resize_img_tensor(face_uv, 480, None)
-    W_t, H_t  = get_WH_from_UV(face_2D)
-
-    face_2D = render(face_2D.numpy(), face_basis.color, face_basis.mesh.astype(np.int), int(H_t), int(W_t))
+    face_2D = wrap_render(face_uv, face_basis.color, face_basis.mesh)
 
     plt.imsave(args.face_2D_file, face_2D)
 
