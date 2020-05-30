@@ -63,13 +63,22 @@ def main(args):
     # Get landmarks target points
     print("Extracting landmarks from target ", args.target)
 
-    target_lmks = torch_norm(
-        Tensor(
-            detect_landmark(
-                im2np(args.target)
-            ) * -1
+    target_img = im2np(args.target)
+
+    target_lmks = Tensor(
+        detect_landmark(
+            target_img
         )
     )
+
+    if args.plotting:
+        plt.imshow(target_img)
+        lmks = target_lmks.detach().numpy()
+        plt.scatter(lmks[:,0], lmks[:,1])
+
+        plt.show()
+
+    target_lmks = torch_norm(target_lmks*-1)
 
     # Get full pipeline model
     print("Init pipeline model for rendering")
