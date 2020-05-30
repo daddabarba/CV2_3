@@ -87,3 +87,28 @@ This will generate a uv plot of the landmark points (`mehses/face_uv.png`) and a
 ```
 python3 test.py --omega 0 10 0 --t 0 0 -500 --latent ../latent/test_3D_transform.pkl
 ```
+
+### Latent parameters estimation (Section 4)
+
+The script `fit.py` serves the purpose of running only this section. The parameters specification is the same as mentioned in the previous section of this README file. An example of latent parameter estimation is the command
+
+```
+python3 fit.py --target ../faces/woman.jpeg --output ../latent/woman.pkl --plotting True --epochs 1000
+```
+
+This script will only find the parameters of a given face. The rendering is done in the following section.
+
+### Texturing (Section 5)
+
+The script `texturing.py` can be used for this purpose. For instance, to render (with and without texture) the latent parameters used in the example for the previous section, simply run
+
+```
+python3 texturing.py --target ../faces/woman.jpeg --latent ../latent/woman.pkl
+```
+
+This will generate 4 files:
+
+* `meshes/face_untextured.obj`, which is the point cloud of the face without using the colors from the targets
+* `meshes/face_untextured.png`, which is the rendering of the face without using the colors from the targets
+* `meshes/face_textured.obj`, which is the point cloud of the face using the colors from the targets
+* `meshes/face_textured.png`, which is the rendering of the face using the colors from the targets
