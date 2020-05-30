@@ -10,7 +10,7 @@ to install the dependencies. Keep in mind that `cmake` is needed for the install
 
 `conda activate cv2`
 
-You will also need to download (BFM model)[(https://faces.dmi.unibas.ch/bfm/bfm2017.html] and place `model2017-1_face12_nomouth.h5` in `data`.
+You will also need to download [BFM model](https://faces.dmi.unibas.ch/bfm/bfm2017.html) and place `model2017-1_face12_nomouth.h5` in `data`.
 
 ## Scripts
 
