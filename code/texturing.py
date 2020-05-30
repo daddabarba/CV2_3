@@ -186,12 +186,10 @@ def main(args):
         render3D.basis.mesh
     )
 
-    face_uv = Camera(args.fov, args.aratio, args.near_far)(points3D)
-
     plt.imsave(
         args.pointcloud + ".png",
-        wrap_render(
-            face_uv,
+        render(
+            points3D,
             render3D.basis.color,
             render3D.basis.mesh
         ),
@@ -208,8 +206,8 @@ def main(args):
 
     plt.imsave(
         args.output + ".png",
-        wrap_render(
-            face_uv,
+        render(
+            points3D,
             color/255,
             render3D.basis.mesh
         ),

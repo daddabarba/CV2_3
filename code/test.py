@@ -110,14 +110,6 @@ def main(args):
     if args.up_to is not None and args.up_to == "project":
         return
 
-    print("Rendering 2D image")
-
-    print("\tExtracting pixels")
-
-    face_2D = wrap_render(face_uv, face_basis.color, face_basis.mesh)
-
-    plt.imsave(args.face_2D_file, face_2D)
-
 if __name__ == "__main__":
 
     parser = ArgumentParser()
@@ -226,13 +218,6 @@ if __name__ == "__main__":
         type = str,
         default = "../meshes/face_uv",
         help = "File in which to save uv render of face (both as png and obj file)",
-    )
-
-    parser.add_argument(
-        "--face_2D_file",
-        type = str,
-        default = "../meshes/face_2D.png",
-        help = "File in which to save 2D render of face",
     )
 
     main(parser.parse_args())
