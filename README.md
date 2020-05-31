@@ -135,3 +135,14 @@ This will generate 4 files:
 * `meshes/face_untextured.png`, which is the rendering of the face without using the colors from the targets
 * `meshes/face_textured.obj`, which is the point cloud of the face using the colors from the targets
 * `meshes/face_textured.png`, which is the rendering of the face using the colors from the targets
+
+### Multi-Frames (Section 6)
+
+The `fit.py` and `texturing.py` scripts can take multiple targets. Simply run
+
+```
+python3 fit.py --target ../faces/face_center.jpg ../faces/face_l.jpg ../faces/face_r.jpg --output ../latent/multi.pkl --plotting True --epochs 1000;
+python3 texturing.py --target ../faces/face_center.jpg ../faces/face_l.jpg ../faces/face_r.jpg --latent ../latent/multi.pkl;
+```
+
+to generate the results shown in the report (section 6).
