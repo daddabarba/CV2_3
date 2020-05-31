@@ -87,7 +87,7 @@ def main(args):
     print("Loading latent variables values ... ", end="")
 
     with open(args.latent, "rb") as f:
-        latent, transforms = pickle.load(f)
+        (alpha, deltas), transforms = pickle.load(f)
 
     print("done")
 
@@ -122,7 +122,9 @@ def main(args):
 
     # Get predicted landmarks (in image coordinate system)
 
-    for i, (target_img, transform, target_lmks) in enumerate(zip(target_imgs, transforms, targets)):
+    for i, (delta, target_img, transform, target_lmks) in enumerate(zip(deltas, target_imgs, transforms, targets)):
+
+        latent = (alpha, delta)
 
         print("Texturing ", args.targets[i])
 
@@ -216,17 +218,6 @@ def main(args):
             render3D.basis.mesh
         )
 
-        face_uv = Camera(args.fov, args.aratio, args.near_far)(points3D)
-
-        plt.imsave(
-            args.pointcloud + suffix + ".png",
-            wrap_render(
-                face_uv,
-                render3D.basis.color,
-                render3D.basis.mesh
-            ),
-        )
-
         # Save textured 3D model
 
         save_obj(
@@ -235,6 +226,8 @@ def main(args):
             color,
             render3D.basis.mesh
         )
+
+        face_uv = Camera(args.fov, args.aratio, args.near_far)(points3D)
 
         plt.imsave(
             args.output + suffix + ".png",

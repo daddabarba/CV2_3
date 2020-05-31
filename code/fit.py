@@ -139,26 +139,28 @@ def main(args):
             requires_grad = True
         )
 
-    latent = init_latent(args.size_id), init_latent(args.size_exp)
+    alpha = init_latent(args.size_id)
 
+    deltas = []
     transforms = []
 
     for _ in range(len(args.targets)):
+        deltas.append(init_latent(args.size_exp))
         transforms.append((init_latent(3) if args.omega is None else set_latent(args.omega), init_latent(3) if args.t is None else set_latent(args.t)))
 
     # Init optimizer
 
-    optim = Adam(latent + tuple(i for transform in transforms for i in transform), lr = args.lr)
+    optim = Adam([alpha] + deltas + [i for transform in transforms for i in transform], lr = args.lr)
 
     # Fit latent parameters
     print("Starting to fit latent parameters")
 
     if args.plotting:
 
-        for transform, target in zip(transforms, target_lmks):
+        for delta, transform, target in zip(deltas, transforms, target_lmks):
 
             _ = loss(
-                latent,
+                (alpha, delta),
                 transform,
                 target
             )
@@ -176,11 +178,11 @@ def main(args):
         optim.zero_grad()
 
         err_tot = 0
-        for transform, target in zip(transforms, target_lmks):
+        for delta, transform, target in zip(deltas, transforms, target_lmks):
 
             # Compute loss
             err = loss (
-                latent,
+                (alpha, delta),
                 transform,
                 target
             )
@@ -197,10 +199,10 @@ def main(args):
         epoch_bar.set_description("err: %.3f"%(err_tot/len(args.targets)))
 
     if args.plotting:
-        for transform, target in zip(transforms, target_lmks):
+        for delta, transform, target in zip(deltas, transforms, target_lmks):
 
             _ = loss(
-                latent,
+                (alpha, delta),
                 transform,
                 target
             )
@@ -212,7 +214,7 @@ def main(args):
             )
 
     with open(args.output, "wb") as f:
-        pickle.dump((latent, transforms), f)
+        pickle.dump(((alpha, deltas), transforms), f)
 
 if __name__ == "__main__":
 
