@@ -132,7 +132,6 @@ for my own face.
 This will generate 4 files:
 
 * `meshes/face_untextured.obj`, which is the point cloud of the face without using the colors from the targets
-* `meshes/face_untextured.png`, which is the rendering of the face without using the colors from the targets
 * `meshes/face_textured.obj`, which is the point cloud of the face using the colors from the targets
 * `meshes/face_textured.png`, which is the rendering of the face using the colors from the targets
 
